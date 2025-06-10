@@ -1,0 +1,10 @@
+export { AudioProcessor } from './processor';
+export { AudioDownloader } from './modules/audioDownloader';
+export { AudioChunker } from './modules/audioChunker';
+export { Transcriber } from './modules/transcriber';
+export { Merger } from './modules/merger';
+export { HighlightsExtractor } from './modules/highlights';
+export { OutputBuilder } from './modules/outputBuilder';
+export * from './types';
+export * from './utils/timeUtils';
+export * from './utils/fileUtils';
