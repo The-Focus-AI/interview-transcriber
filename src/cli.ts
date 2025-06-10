@@ -67,10 +67,12 @@ program
     console.log('\n📋 Audio Transcriber - Dependency Information\n');
     console.log('Required dependencies:');
     console.log('  ✓ Node.js (you have this!)');
-    console.log('  ✓ npm packages (auto-installed)');
+    console.log('  ✓ pnpm (package manager)');
     console.log('  ⚠️  yt-dlp (required for YouTube downloads)');
     console.log('  ⚠️  ffmpeg (required for audio processing)');
     console.log('  ⚠️  Google Gemini API key (required for transcription)');
+    console.log('\nTo install pnpm:');
+    console.log('  npm install -g pnpm');
     console.log('\nTo install yt-dlp:');
     console.log('  - macOS: brew install yt-dlp');
     console.log('  - Ubuntu/Debian: sudo apt install yt-dlp');

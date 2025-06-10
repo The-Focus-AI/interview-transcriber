@@ -23,7 +23,11 @@ A powerful Node.js tool to download audio from YouTube or podcast URLs, transcri
 ## Prerequisites
 
 1. **Node.js** (v16 or higher)
-2. **yt-dlp** - For YouTube downloads
+2. **pnpm** - Fast, disk space efficient package manager
+   ```bash
+   npm install -g pnpm
+   ```
+3. **yt-dlp** - For YouTube downloads
    ```bash
    # macOS
    brew install yt-dlp
@@ -35,7 +39,7 @@ A powerful Node.js tool to download audio from YouTube or podcast URLs, transcri
    # Download from https://github.com/yt-dlp/yt-dlp/releases
    ```
 
-3. **ffmpeg** - For audio processing
+4. **ffmpeg** - For audio processing
    ```bash
    # macOS
    brew install ffmpeg
@@ -47,7 +51,7 @@ A powerful Node.js tool to download audio from YouTube or podcast URLs, transcri
    # Download from https://ffmpeg.org/download.html
    ```
 
-4. **Google Gemini API Key**
+5. **Google Gemini API Key**
    - Get your API key from: https://makersuite.google.com/app/apikey
 
 ## Installation
@@ -58,7 +62,7 @@ git clone <repository-url>
 cd audio-transcriber
 
 # Install dependencies
-npm install
+pnpm install
 
 # Copy environment file and add your API key
 cp .env.example .env
@@ -71,13 +75,13 @@ cp .env.example .env
 
 ```bash
 # Transcribe a YouTube video
-npm run dev "https://www.youtube.com/watch?v=VIDEO_ID"
+pnpm dev "https://www.youtube.com/watch?v=VIDEO_ID"
 
 # Transcribe a direct MP3 URL
-npm run dev "https://example.com/podcast.mp3"
+pnpm dev "https://example.com/podcast.mp3"
 
 # With custom output path
-npm run dev "https://www.youtube.com/watch?v=VIDEO_ID" -o ./my-transcript.json
+pnpm dev "https://www.youtube.com/watch?v=VIDEO_ID" -o ./my-transcript.json
 ```
 
 ### Command Line Options
@@ -99,16 +103,16 @@ Options:
 
 ```bash
 # Display dependency information
-npm run dev info
+pnpm dev info
 
 # Run a test transcription
-npm run dev test
+pnpm dev test
 
 # Build the project
-npm run build
+pnpm build
 
 # Clean temporary files
-npm run clean
+pnpm clean
 ```
 
 ## Output Files

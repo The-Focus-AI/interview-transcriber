@@ -12,12 +12,16 @@ if ! command -v node &> /dev/null; then
 fi
 echo "✅ Node.js found: $(node --version)"
 
-# Check if npm is installed
-if ! command -v npm &> /dev/null; then
-    echo "❌ npm is not installed!"
+# Check if pnpm is installed
+if ! command -v pnpm &> /dev/null; then
+    echo "❌ pnpm is not installed!"
+    echo ""
+    echo "To install pnpm:"
+    echo "  npm install -g pnpm"
+    echo ""
     exit 1
 fi
-echo "✅ npm found: $(npm --version)"
+echo "✅ pnpm found: $(pnpm --version)"
 
 # Check if yt-dlp is installed
 if ! command -v yt-dlp &> /dev/null; then
@@ -74,18 +78,18 @@ else
 fi
 
 echo ""
-echo "📦 Installing npm dependencies..."
-npm install
+echo "📦 Installing dependencies..."
+pnpm install
 
 echo ""
 echo "🔨 Building the project..."
-npm run build
+pnpm build
 
 echo ""
 echo "✨ Setup complete!"
 echo ""
 echo "To test the installation, run:"
-echo "  npm run dev info"
+echo "  pnpm dev info"
 echo ""
 echo "To transcribe a video, run:"
-echo "  npm run dev 'https://www.youtube.com/watch?v=VIDEO_ID'"
+echo "  pnpm dev 'https://www.youtube.com/watch?v=VIDEO_ID'"

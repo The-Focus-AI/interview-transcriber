@@ -2,7 +2,16 @@
 
 ## Prerequisites Installation
 
-### 1. Install yt-dlp
+### 1. Install pnpm
+```bash
+# Install pnpm globally
+npm install -g pnpm
+
+# Check installation
+pnpm --version
+```
+
+### 2. Install yt-dlp
 ```bash
 # macOS
 brew install yt-dlp
@@ -14,7 +23,7 @@ sudo apt install yt-dlp
 yt-dlp --version
 ```
 
-### 2. Install ffmpeg
+### 3. Install ffmpeg
 ```bash
 # macOS
 brew install ffmpeg
@@ -26,7 +35,7 @@ sudo apt install ffmpeg
 ffmpeg -version
 ```
 
-### 3. Get Google Gemini API Key
+### 4. Get Google Gemini API Key
 1. Visit https://makersuite.google.com/app/apikey
 2. Create a new API key
 3. Save it for the next step
@@ -40,7 +49,7 @@ git clone <repository-url>
 cd audio-transcriber
 
 # Install dependencies
-npm install
+pnpm install
 
 # Or use the setup script
 chmod +x scripts/setup.sh
@@ -61,22 +70,22 @@ cp .env.example .env
 ### Basic Usage
 ```bash
 # Transcribe a YouTube video
-npm run dev "https://www.youtube.com/watch?v=aqz-KE-bpKQ"
+pnpm dev "https://www.youtube.com/watch?v=aqz-KE-bpKQ"
 
 # Transcribe with custom output
-npm run dev "https://www.youtube.com/watch?v=VIDEO_ID" -o ./my-transcript.json
+pnpm dev "https://www.youtube.com/watch?v=VIDEO_ID" -o ./my-transcript.json
 
 # Transcribe with 5-minute chunks
-npm run dev "https://www.youtube.com/watch?v=VIDEO_ID" -c 300
+pnpm dev "https://www.youtube.com/watch?v=VIDEO_ID" -c 300
 ```
 
 ### Test Your Setup
 ```bash
 # Check dependencies
-npm run dev info
+pnpm dev info
 
 # Run a test transcription
-npm run dev test
+pnpm dev test
 ```
 
 ## Common Issues
@@ -100,6 +109,6 @@ After successful transcription, you'll find:
 
 ## Need Help?
 
-- Run `npm run dev --help` for all options
+- Run `pnpm dev --help` for all options
 - Check the full README.md for detailed documentation
 - Report issues at the repository
