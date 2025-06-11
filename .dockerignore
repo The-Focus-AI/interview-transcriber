@@ -1,0 +1,10 @@
+node_modules
+output
+temp
+.env
+.DS_Store
+tests
+*.log
+.git
+.gitignore
+pnpm-debug.log 

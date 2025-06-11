@@ -1,4 +1,4 @@
-# Audio Transcriber 🎙️
+# Interview Transcriber 🎙️
 
 A powerful Node.js tool to download audio from YouTube or podcast URLs, transcribe using Google Gemini AI, and generate comprehensive summaries with speaker identification and tone analysis.
 
@@ -151,6 +151,58 @@ A summary report containing:
 - Key highlights
 - Speaker statistics
 - Tone distribution analysis
+
+## Docker Usage
+
+You can run Interview Transcriber in a Docker container for easy, reproducible usage.
+
+### Build the Docker image
+
+```bash
+docker build -t interview-transcriber .
+```
+
+### Run the container
+
+```bash
+docker run --rm \
+  -e GEMINI_API_KEY=your_actual_api_key \
+  -v $(pwd)/output:/output \
+  interview-transcriber "https://www.youtube.com/watch?v=VIDEO_ID"
+```
+
+- This will save the transcript in your local `output/` directory.
+- You can also specify a custom output file:
+
+```bash
+docker run --rm \
+  -e GEMINI_API_KEY=your_actual_api_key \
+  -v $(pwd)/output:/output \
+  interview-transcriber "https://www.youtube.com/watch?v=VIDEO_ID" /output/my-transcript.json
+```
+
+### Using a `.env` file for environment variables
+
+Instead of specifying the API key directly, you can store it in a `.env` file:
+
+```env
+# .env
+GEMINI_API_KEY=your_actual_api_key
+```
+
+Then run the container with:
+
+```bash
+docker run --rm \
+  --env-file .env \
+  -v $(pwd)/output:/output \
+  interview-transcriber "https://www.youtube.com/watch?v=VIDEO_ID"
+```
+
+### Notes
+- The `GEMINI_API_KEY` environment variable is required for Google Gemini transcription.
+- The `/output` directory inside the container should be mounted to a local directory to access results.
+- All other CLI options are supported as in the native usage.
 
 ## API Usage
 

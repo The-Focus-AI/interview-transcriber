@@ -50,7 +50,7 @@ devDependencies:
     specifier: ^10.9.1
     version: 10.9.2(@types/node@20.19.0)(typescript@5.8.3)
   typescript:
-    specifier: ^5.3.2
+    specifier: ^5.8.3
     version: 5.8.3
 
 packages:
