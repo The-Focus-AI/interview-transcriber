@@ -9,9 +9,9 @@ export class Transcriber {
 
   constructor(options: TranscriptionOptions) {
     this.genAI = new GoogleGenerativeAI(options.apiKey);
-    // Using Gemini 1.5 Flash for audio transcription
+    // Using Gemini 2.5 Flash for audio transcription
     this.model = this.genAI.getGenerativeModel({ 
-      model: options.model || 'gemini-1.5-flash' 
+      model: options.model || 'models/gemini-2.5-flash-preview-05-20' 
     });
   }
 
@@ -25,20 +25,38 @@ export class Transcriber {
 
       // Create the prompt for transcription with speaker detection and tone analysis
       const prompt = `Please transcribe this audio file with the following requirements:
-1. Provide accurate transcription of all spoken words
-2. Identify different speakers if possible (label as Speaker 1, Speaker 2, etc.)
-3. Analyze the tone/emotion of each segment (e.g., calm, excited, serious, humorous, etc.)
-4. Break the transcription into meaningful segments based on speaker changes or topic shifts
-5. Include timestamps for each segment
+1. Provide accurate transcription of all spoken words.
+2. Identify different speakers if possible (label as "Speaker 1", "Speaker 2", etc.).
+3. Analyze the tone/emotion of each segment (e.g., calm, excited, serious, humorous, etc.).
+4. Break the transcription into meaningful segments based on speaker changes or topic shifts.
+5. Include timestamps for each segment.
 
-Format the response as a JSON array with objects containing:
-- start: timestamp in seconds from the beginning of this chunk
-- end: timestamp in seconds from the beginning of this chunk
-- speaker: identified speaker label
-- tone: analyzed tone/emotion
-- text: transcribed text for this segment
+Format the response as a **JSON array**. Each element must be an object with the following fields and types:
+- "start": number (timestamp in seconds from the beginning of this chunk, required)
+- "end": number (timestamp in seconds from the beginning of this chunk, required)
+- "speaker": string (identified speaker label, required)
+- "tone": string (analyzed tone/emotion, required)
+- "text": string (transcribed text for this segment, required)
 
-Only return the JSON array, no additional text.`;
+**Do not include any text or explanation before or after the JSON array. Only output valid JSON.**
+
+Example:
+[
+  {
+    "start": 0,
+    "end": 12.5,
+    "speaker": "Speaker 1",
+    "tone": "calm",
+    "text": "Welcome to the podcast. Today we have a special guest."
+  },
+  {
+    "start": 12.5,
+    "end": 18.0,
+    "speaker": "Speaker 2",
+    "tone": "excited",
+    "text": "Thank you for having me! I'm excited to be here."
+  }
+]`;
 
       // Generate content with audio
       const result = await this.model.generateContent([

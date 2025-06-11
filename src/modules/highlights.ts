@@ -7,7 +7,7 @@ export class HighlightsExtractor {
 
   constructor(apiKey: string) {
     this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    this.model = this.genAI.getGenerativeModel({ model: 'models/gemini-2.5-flash-preview-05-20' });
   }
 
   async extractHighlights(segments: TranscriptSegment[]): Promise<string[]> {
@@ -37,14 +37,20 @@ ${fullText}`;
 
       // Parse the JSON response
       const jsonText = text.match(/\[[\s\S]*\]/)?.[0] || text;
-      const highlights = JSON.parse(jsonText);
+      try {
+        const highlights = JSON.parse(jsonText);
 
-      if (Array.isArray(highlights)) {
-        console.log(`Extracted ${highlights.length} highlights`);
-        return highlights.filter((h: any) => typeof h === 'string' && h.trim() !== '');
+        if (Array.isArray(highlights)) {
+          console.log(`Extracted ${highlights.length} highlights`);
+          return highlights.filter((h: any) => typeof h === 'string' && h.trim() !== '');
+        }
+
+        throw new Error('Invalid highlights format');
+      } catch (parseError) {
+        console.error('Model did not return valid JSON for highlights. Full response:');
+        console.error(text);
+        process.exit(1);
       }
-
-      throw new Error('Invalid highlights format');
     } catch (error) {
       console.error('Failed to extract highlights:', error);
       // Fallback: extract some basic highlights manually

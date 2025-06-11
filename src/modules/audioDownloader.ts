@@ -68,7 +68,6 @@ export class AudioDownloader {
       '--prefer-ffmpeg',
       '--add-metadata',
       '--embed-thumbnail',
-      '--ppa', 'EmbedThumbnail: --atomic',
     ];
 
     return new Promise((resolve, reject) => {

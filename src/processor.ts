@@ -38,15 +38,21 @@ export class AudioProcessor {
     console.log(`URL: ${options.url}`);
     
     const tempDir = options.tempDir || process.env.TEMP_DIR || './temp';
-    const outputDir = path.dirname(options.outputPath || process.env.OUTPUT_DIR || './output');
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10); // YYYY-MM-DD
+    const timeStr = now.toISOString().slice(11, 19).replace(/:/g, ''); // HHMMSS
+    const runFolder = `${dateStr}_${timeStr}`;
+    const runTempDir = path.join(tempDir, runFolder);
+    const outputBase = process.env.OUTPUT_DIR || './output';
+    const outputDir = path.join(outputBase, runFolder);
     const chunkDuration = options.chunkDuration || 600; // 10 minutes default
 
     try {
       // Step 1: Setup directories
       console.log('\n📁 Setting up directories...');
-      await ensureDir(tempDir);
+      await ensureDir(runTempDir);
       await ensureDir(outputDir);
-      const chunksDir = path.join(tempDir, 'chunks');
+      const chunksDir = path.join(runTempDir, 'chunks');
       await ensureDir(chunksDir);
 
       // Step 2: Get video/audio metadata
@@ -62,15 +68,35 @@ export class AudioProcessor {
 
       // Step 3: Download audio
       console.log('\n⬇️  Downloading audio...');
-      const audioPath = path.join(tempDir, 'audio.mp3');
+      const audioPath = path.join(runTempDir, 'audio.mp3');
       const downloadedPath = await this.downloader.downloadAudio(options.url, {
         outputPath: audioPath,
         format: 'mp3'
       });
 
+      // Step 3.5: Downsample audio to 16 kHz mono
+      console.log('\n🎚️  Downsampling audio to 16 kHz mono...');
+      const downsampledPath = path.join(runTempDir, 'audio_16k_mono.mp3');
+      await new Promise<void>((resolve, reject) => {
+        const ffmpeg = require('fluent-ffmpeg');
+        ffmpeg(downloadedPath)
+          .audioChannels(1)
+          .audioFrequency(16000)
+          .audioCodec('libmp3lame')
+          .output(downsampledPath)
+          .on('end', () => {
+            console.log('Downsampling complete:', downsampledPath);
+            resolve();
+          })
+          .on('error', (err: any) => {
+            reject(new Error('Failed to downsample audio: ' + err.message));
+          })
+          .run();
+      });
+
       // Step 4: Split audio into chunks
       console.log('\n✂️  Splitting audio into chunks...');
-      const chunks = await this.chunker.splitAudio(downloadedPath, chunksDir, chunkDuration);
+      const chunks = await this.chunker.splitAudio(downsampledPath, chunksDir, chunkDuration);
 
       // Step 5: Transcribe all chunks
       console.log('\n🎯 Transcribing audio chunks...');
@@ -97,8 +123,13 @@ export class AudioProcessor {
       );
 
       // Step 9: Save output files
-      const outputPath = options.outputPath || 
-        path.join(outputDir, generateOutputFilename(options.url, 'json'));
+      let outputPath: string;
+      if (options.outputPath) {
+        // Use the custom file name, but always in outputDir
+        outputPath = path.join(outputDir, path.basename(options.outputPath));
+      } else {
+        outputPath = path.join(outputDir, generateOutputFilename(options.url, 'json'));
+      }
       
       await this.outputBuilder.saveToFile(finalOutput, outputPath);
       

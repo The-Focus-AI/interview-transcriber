@@ -76,7 +76,9 @@ export class AudioChunker {
         .setDuration(chunk.duration)
         .output(chunk.path)
         .audioCodec('libmp3lame')
-        .audioBitrate('192k')
+        .audioBitrate('32k')
+        .audioChannels(1)
+        .audioFrequency(16000)
         .on('end', () => {
           console.log(`Chunk ${chunk.index} created successfully`);
           resolve();
