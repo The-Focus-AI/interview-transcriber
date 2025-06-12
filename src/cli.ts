@@ -18,6 +18,7 @@ program
   .option('-t, --temp-dir <path>', 'Temporary directory for processing (default: ./temp)')
   .option('-c, --chunk-duration <seconds>', 'Duration of each chunk in seconds (default: 600)', parseInt)
   .option('-k, --keep-chunks', 'Keep temporary audio chunks after processing')
+  .option('-s, --save-temp-files', 'Keep all temporary files including raw audio, downsampled audio, chunks, and intermediate files')
   .option('--no-text', 'Skip generating text transcript file')
   .option('--no-report', 'Skip generating metadata report file')
   .action(async (url: string, options: any) => {
@@ -41,7 +42,8 @@ program
         outputPath: options.output,
         tempDir: options.tempDir,
         chunkDuration: options.chunkDuration,
-        keepChunks: options.keepChunks || false
+        keepChunks: options.keepChunks || false,
+        saveAllTempFiles: options.saveTempFiles || false
       };
 
       // Create processor and run

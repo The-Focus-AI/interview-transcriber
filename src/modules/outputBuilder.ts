@@ -62,13 +62,12 @@ export class OutputBuilder {
     // Format transcript
     for (const segment of segments) {
       if (includeMetadata) {
-        content += `[${segment.start} - ${segment.end}]\n`;
+        content += `[${segment.timestamp}]\n`;
+        content += `Ad: ${segment.ad ? 'Yes' : 'No'}\n`;
         content += `Speaker: ${segment.speaker}\n`;
         content += `Tone: ${segment.tone}\n\n`;
       }
-      
       content += `${segment.text}\n\n`;
-      
       if (includeMetadata) {
         content += '---\n\n';
       }

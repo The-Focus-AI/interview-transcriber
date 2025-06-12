@@ -1,4 +1,5 @@
 import { ChunkTranscription, TranscriptSegment } from '../types';
+import { adjustTimestamp, timestampToSeconds, secondsToTimestamp } from '../utils/timeUtils';
 
 export class Merger {
   mergeTranscriptions(chunkTranscriptions: ChunkTranscription[]): TranscriptSegment[] {
@@ -7,61 +8,28 @@ export class Merger {
     // Sort chunks by index to ensure correct order
     const sortedChunks = [...chunkTranscriptions].sort((a, b) => a.chunkIndex - b.chunkIndex);
 
-    // Flatten all segments from all chunks
+    // Adjust timestamps and flatten all segments
     const allSegments: TranscriptSegment[] = [];
-    
     for (const chunk of sortedChunks) {
-      allSegments.push(...chunk.segments);
-    }
-
-    // Post-process to ensure continuity and clean up
-    const mergedSegments = this.postProcessSegments(allSegments);
-
-    console.log(`Merged ${chunkTranscriptions.length} chunks into ${mergedSegments.length} segments`);
-    return mergedSegments;
-  }
-
-  private postProcessSegments(segments: TranscriptSegment[]): TranscriptSegment[] {
-    if (segments.length === 0) return [];
-
-    const processed: TranscriptSegment[] = [];
-    let currentSegment: TranscriptSegment | null = null;
-
-    for (const segment of segments) {
-      // Skip empty segments
-      if (!segment.text || segment.text.trim() === '') {
-        continue;
-      }
-
-      // If this is the first segment or speaker/tone changed, start a new segment
-      if (!currentSegment || 
-          currentSegment.speaker !== segment.speaker || 
-          currentSegment.tone !== segment.tone) {
+      for (const segment of chunk.segments) {
+        // Convert timestamp (MM:SS) to seconds, add chunk.startTime, then back to timestamp format
+        // timestampToSeconds handles both MM:SS and HH:MM:SS formats
+        const absSeconds = timestampToSeconds(segment.timestamp) + chunk.startTime;
         
-        if (currentSegment) {
-          processed.push(currentSegment);
-        }
-        
-        currentSegment = {
-          start: segment.start,
-          end: segment.end,
-          speaker: segment.speaker,
-          tone: segment.tone,
-          text: segment.text.trim()
-        };
-      } else {
-        // Same speaker and tone, merge the segments
-        currentSegment.end = segment.end;
-        currentSegment.text += ' ' + segment.text.trim();
+        // Format as MM:SS or HH:MM:SS based on the total duration
+        // For simplicity, we use HH:MM:SS for consistency
+        allSegments.push({
+          ...segment,
+          timestamp: secondsToTimestamp(absSeconds)
+        });
       }
     }
 
-    // Don't forget the last segment
-    if (currentSegment) {
-      processed.push(currentSegment);
-    }
+    // Sort by absolute timestamp
+    allSegments.sort((a, b) => timestampToSeconds(a.timestamp) - timestampToSeconds(b.timestamp));
 
-    return processed;
+    console.log(`Merged ${chunkTranscriptions.length} chunks into ${allSegments.length} utterances`);
+    return allSegments;
   }
 
   identifySpeakers(segments: TranscriptSegment[]): TranscriptSegment[] {

@@ -1,9 +1,9 @@
 export interface TranscriptSegment {
-  start: string;
-  end: string;
-  speaker?: string;
-  tone?: string;
+  timestamp: string; // mm:ss, relative to chunk start
+  ad: boolean;
+  speaker: string;
   text: string;
+  tone: string;
 }
 
 export interface FinalOutput {
@@ -44,5 +44,6 @@ export interface ProcessingOptions {
   outputPath?: string;
   tempDir?: string;
   keepChunks?: boolean;
+  saveAllTempFiles?: boolean; // Save all temporary files, including raw audio, downsampled audio, etc.
   chunkDuration?: number; // in seconds, default 600 (10 minutes)
 }

@@ -10,15 +10,22 @@ export function secondsToTimestamp(seconds: number): string {
 
 export function timestampToSeconds(timestamp: string): number {
   const parts = timestamp.split(':');
-  if (parts.length !== 3) {
-    throw new Error('Invalid timestamp format. Expected HH:MM:SS');
+  
+  // Handle both MM:SS and HH:MM:SS formats
+  if (parts.length === 2) {
+    // MM:SS format
+    const minutes = parseInt(parts[0], 10);
+    const seconds = parseInt(parts[1], 10);
+    return minutes * 60 + seconds;
+  } else if (parts.length === 3) {
+    // HH:MM:SS format
+    const hours = parseInt(parts[0], 10);
+    const minutes = parseInt(parts[1], 10);
+    const seconds = parseInt(parts[2], 10);
+    return hours * 3600 + minutes * 60 + seconds;
+  } else {
+    throw new Error('Invalid timestamp format. Expected MM:SS or HH:MM:SS');
   }
-  
-  const hours = parseInt(parts[0], 10);
-  const minutes = parseInt(parts[1], 10);
-  const seconds = parseInt(parts[2], 10);
-  
-  return hours * 3600 + minutes * 60 + seconds;
 }
 
 export function adjustTimestamp(timestamp: string, offsetSeconds: number): string {
