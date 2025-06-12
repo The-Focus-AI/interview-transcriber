@@ -1,5 +1,5 @@
 {
-  "name": "audio-transcriber",
+  "name": "interview-transcriber",
   "version": "1.0.0",
   "description": "YouTube/Podcast Audio Downloader, Transcriber & Summarizer",
   "main": "dist/index.js",

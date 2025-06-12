@@ -44,7 +44,7 @@ export class AudioProcessor {
     const runFolder = `${dateStr}_${timeStr}`;
     const runTempDir = path.join(tempDir, runFolder);
     const outputBase = process.env.OUTPUT_DIR || './output';
-    const outputDir = path.join(outputBase, runFolder);
+    const outputDir = outputBase; // No timestamped subdirectory
     const chunkDuration = options.chunkDuration || 600; // 10 minutes default
 
     try {
@@ -52,6 +52,8 @@ export class AudioProcessor {
       console.log('\n📁 Setting up directories...');
       await ensureDir(runTempDir);
       await ensureDir(outputDir);
+      console.log(`Output directory: ${outputDir}`);
+      
       const chunksDir = path.join(runTempDir, 'chunks');
       await ensureDir(chunksDir);
 
@@ -123,10 +125,10 @@ export class AudioProcessor {
       );
 
       // Step 9: Save output files
-      let outputPath: string;
-      if (options.outputPath) {
-        // Use the custom file name, but always in outputDir
-        outputPath = path.join(outputDir, path.basename(options.outputPath));
+      let outputPath: string = '';
+      if (options.outputPath && typeof options.outputPath === 'string') {
+        // Use the custom file name, directly in outputDir
+        outputPath = path.join(outputDir, path.basename(options.outputPath || ''));
       } else {
         outputPath = path.join(outputDir, generateOutputFilename(options.url, 'json'));
       }
@@ -137,6 +139,8 @@ export class AudioProcessor {
       const baseName = path.basename(outputPath, '.json');
       const textPath = path.join(outputDir, `${baseName}.txt`);
       const reportPath = path.join(outputDir, `${baseName}_report.txt`);
+
+      console.log(`Text path: ${textPath}`);
       
       await this.outputBuilder.saveTranscriptAsText(identifiedSegments, textPath);
       await this.outputBuilder.saveMetadataReport(finalOutput, reportPath);
