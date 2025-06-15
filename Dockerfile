@@ -4,7 +4,7 @@ RUN apk add git openssh
 
 WORKDIR /app
 
-RUN git clone https://github.com/The-Focus-AI/shell-job-queue.git .
+RUN git  clone https://github.com/The-Focus-AI/shell-job-queue.git .
 
 RUN go mod download
 

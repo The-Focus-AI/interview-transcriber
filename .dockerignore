@@ -8,3 +8,7 @@ tests
 .git
 .gitignore
 pnpm-debug.log 
+jobs/
+dist/
+temp/
+output/
