@@ -1,5 +1,22 @@
+FROM golang:1.21-alpine as processjobqueue
+
+RUN apk add git openssh
+
+WORKDIR /app
+
+RUN git clone https://github.com/The-Focus-AI/shell-job-queue.git .
+
+RUN go mod download
+
+RUN go build -o processjobqueue main.go
+
 # Use official Node.js LTS image
 FROM node:18-slim
+
+# Copy processjobqueue binary from previous stage
+COPY --from=processjobqueue /app/processjobqueue /usr/local/bin/
+
+RUN ls -l /usr/local/bin
 
 # Install system dependencies: ffmpeg and yt-dlp
 RUN apt-get update && \

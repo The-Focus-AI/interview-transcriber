@@ -86,7 +86,8 @@ export class AudioProcessor {
         const audioPath = path.join(runTempDir, 'audio.mp3');
         downloadedPath = await this.downloader.downloadAudio(options.url, {
           outputPath: audioPath,
-          format: 'mp3'
+          format: 'mp3',
+          showProgress: false
         });
         stepStatus.download = true;
       } catch (error) {

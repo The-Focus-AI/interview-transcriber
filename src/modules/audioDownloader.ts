@@ -2,8 +2,12 @@ import YTDlpWrap from 'yt-dlp-wrap';
 import axios from 'axios';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { DownloadOptions } from '../types';
+import { DownloadOptions as BaseDownloadOptions } from '../types';
 import { fileExists } from '../utils/fileUtils';
+
+export interface DownloadOptions extends BaseDownloadOptions {
+  showProgress?: boolean;
+}
 
 export class AudioDownloader {
   private ytDlpWrap: YTDlpWrap;
@@ -16,7 +20,7 @@ export class AudioDownloader {
     try {
       // Check if it's a YouTube URL or direct MP3 URL
       if (this.isDirectMP3Url(url)) {
-        return await this.downloadDirectMP3(url, options.outputPath);
+        return await this.downloadDirectMP3(url, options.outputPath, options.showProgress);
       } else {
         return await this.downloadYouTubeAudio(url, options);
       }
@@ -29,8 +33,8 @@ export class AudioDownloader {
     return url.toLowerCase().endsWith('.mp3') || url.includes('.mp3?');
   }
 
-  private async downloadDirectMP3(url: string, outputPath: string): Promise<string> {
-    console.log(`Downloading MP3 from: ${url}`);
+  private async downloadDirectMP3(url: string, outputPath: string, showProgress = false): Promise<string> {
+    console.error(`Downloading MP3 from: ${url}`);
     
     const response = await axios({
       method: 'GET',
@@ -46,7 +50,7 @@ export class AudioDownloader {
 
     return new Promise((resolve, reject) => {
       writer.on('finish', () => {
-        console.log(`Downloaded MP3 to: ${outputPath}`);
+        console.error(`Downloaded MP3 to: ${outputPath}`);
         resolve(outputPath);
       });
       writer.on('error', reject);
@@ -54,7 +58,7 @@ export class AudioDownloader {
   }
 
   private async downloadYouTubeAudio(url: string, options: DownloadOptions): Promise<string> {
-    console.log(`Downloading audio from YouTube: ${url}`);
+    console.error(`Downloading audio from YouTube: ${url}`);
 
     const format = options.format || 'mp3';
     const ytDlpOptions = [
@@ -74,25 +78,25 @@ export class AudioDownloader {
       const ytDlpProcess = this.ytDlpWrap
         .exec(ytDlpOptions)
         .on('progress', (progress) => {
-          if (progress.percent) {
-            process.stdout.write(`\rDownloading: ${progress.percent}%`);
+          if (options.showProgress && progress.percent) {
+            process.stderr.write(`\rDownloading: ${progress.percent}%`);
           }
         })
         .on('error', (error) => {
           reject(new Error(`yt-dlp error: ${error.message}`));
         })
         .on('close', async () => {
-          process.stdout.write('\n');
+          if (options.showProgress) process.stderr.write('\n');
           
           // Check if file was created with the expected extension
           if (await fileExists(options.outputPath)) {
-            console.log(`Downloaded audio to: ${options.outputPath}`);
+            console.error(`Downloaded audio to: ${options.outputPath}`);
             resolve(options.outputPath);
           } else {
             // yt-dlp might have added extension automatically
             const pathWithExt = `${options.outputPath}.${format}`;
             if (await fileExists(pathWithExt)) {
-              console.log(`Downloaded audio to: ${pathWithExt}`);
+              console.error(`Downloaded audio to: ${pathWithExt}`);
               resolve(pathWithExt);
             } else {
               reject(new Error('Failed to find downloaded audio file'));

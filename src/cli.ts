@@ -12,6 +12,12 @@ program
   .description('YouTube/Podcast Audio Downloader, Transcriber & Summarizer')
   .version('1.0.0');
 
+// Redirect all logs to stderr except for final output
+const origLog = console.log;
+const origWarn = console.warn;
+console.log = (...args: any[]) => { process.stderr.write(args.map(String).join(' ') + '\n'); };
+console.warn = (...args: any[]) => { process.stderr.write(args.map(String).join(' ') + '\n'); };
+
 program
   .argument('<url>', 'YouTube URL or direct MP3 URL to process')
   .option('-o, --output <path>', 'Output file path (default: ./output/transcript_[timestamp].json)')
@@ -50,7 +56,9 @@ program
       const processor = new AudioProcessor();
       const result = await processor.processAudio(processingOptions);
 
-      console.log('\n🎉 Success! Transcription completed.');
+      // Print the final JSON to stdout
+      process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+      origLog('\n🎉 Success! Transcription completed.');
       
     } catch (error) {
       console.error('\n❌ Error:', (error as Error).message);
