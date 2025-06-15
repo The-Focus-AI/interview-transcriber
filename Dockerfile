@@ -4,7 +4,7 @@ RUN apk add git openssh
 
 WORKDIR /app
 
-RUN git  clone https://github.com/The-Focus-AI/shell-job-queue.git .
+RUN git  clone  https://github.com/The-Focus-AI/shell-job-queue.git .
 
 RUN go mod download
 
@@ -41,7 +41,8 @@ COPY . .
 RUN mkdir -p /output
 
 # Set environment variables (can be overridden at runtime)
-ENV OUTPUT_DIR=/output
+ENV OUTPUT_DIR=/data/output
+ENV JOBS_DIR=/data/jobs
 
 # Entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

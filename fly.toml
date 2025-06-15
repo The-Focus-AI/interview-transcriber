@@ -16,7 +16,15 @@ primary_region = 'bos'
   min_machines_running = 0
   processes = ['app']
 
+[env]
+  JOBS_DIR = '/data/jobs'
+  OUTPUT_DIR = '/data/output'
+
 [[vm]]
   memory = '1gb'
   cpu_kind = 'shared'
   cpus = 1
+
+[mounts]
+  source = "transcribervol"
+  destination = "/data"
