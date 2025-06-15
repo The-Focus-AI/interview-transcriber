@@ -16,8 +16,6 @@ FROM node:18-slim
 # Copy processjobqueue binary from previous stage
 COPY --from=processjobqueue /app/processjobqueue /usr/local/bin/
 
-RUN ls -l /usr/local/bin
-
 # Install system dependencies: ffmpeg and yt-dlp
 RUN apt-get update && \
     apt-get install -y ffmpeg wget && \
