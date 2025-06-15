@@ -16,4 +16,4 @@ fi
 
 URL="$1"
 
-pnpm dev $1
+processjobqueue run.sh
