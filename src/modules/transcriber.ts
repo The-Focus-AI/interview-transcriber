@@ -1,7 +1,12 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import * as fs from 'fs/promises';
-import { AudioChunk, ChunkTranscription, TranscriptSegment, TranscriptionOptions } from '../types';
-import { secondsToTimestamp } from '../utils/timeUtils';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import * as fs from "fs/promises";
+import {
+  AudioChunk,
+  ChunkTranscription,
+  TranscriptSegment,
+  TranscriptionOptions,
+} from "../types";
+import { secondsToTimestamp } from "../utils/timeUtils";
 
 export class Transcriber {
   private genAI: GoogleGenerativeAI;
@@ -11,8 +16,8 @@ export class Transcriber {
   constructor(options: TranscriptionOptions) {
     this.genAI = new GoogleGenerativeAI(options.apiKey);
     // Using Gemini 2.5 Flash for audio transcription
-    this.model = this.genAI.getGenerativeModel({ 
-      model: options.model || 'models/gemini-2.5-flash-preview-05-20' 
+    this.model = this.genAI.getGenerativeModel({
+      model: options.model || "models/gemini-2.5-flash-preview-05-20",
     });
   }
 
@@ -22,22 +27,26 @@ export class Transcriber {
     chunkIndex: number
   ): Promise<T> {
     let retries = 0;
-    
+
     while (true) {
       try {
         return await operation();
       } catch (error: any) {
         retries++;
-        
+
         if (retries > this.maxRetries) {
-          console.error(`${errorMessage} for chunk ${chunkIndex}: ${error.message}`);
+          console.error(
+            `${errorMessage} for chunk ${chunkIndex}: ${error.message}`
+          );
           throw error;
         }
-        
+
         // Calculate delay: 1s, 2s, 4s, etc.
         const delay = Math.pow(2, retries - 1) * 1000;
-        console.log(`Retry attempt ${retries}/${this.maxRetries} for chunk ${chunkIndex} after ${delay}ms delay...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        console.log(
+          `Retry attempt ${retries}/${this.maxRetries} for chunk ${chunkIndex} after ${delay}ms delay...`
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
   }
@@ -48,7 +57,7 @@ export class Transcriber {
     try {
       // Read audio file as base64
       const audioData = await fs.readFile(chunk.path);
-      const base64Audio = audioData.toString('base64');
+      const base64Audio = audioData.toString("base64");
 
       // Create the prompt for transcription
       const prompt = `Please transcribe this audio file as a flat list of utterances. For each utterance, provide:
@@ -81,11 +90,11 @@ Format your response as a JSON array, with no text before or after the array. Ex
         const result = await this.model.generateContent([
           {
             inlineData: {
-              mimeType: 'audio/mp3',
-              data: base64Audio
-            }
+              mimeType: "audio/mp3",
+              data: base64Audio,
+            },
           },
-          prompt
+          prompt,
         ]);
 
         const response = await result.response;
@@ -105,73 +114,109 @@ Format your response as a JSON array, with no text before or after the array. Ex
         const parsedSegments = JSON.parse(jsonText);
         // Directly map to TranscriptSegment[]
         segments = parsedSegments.map((seg: any) => ({
-          timestamp: seg.timestamp || '00:00',
-          ad: typeof seg.ad === 'boolean' ? seg.ad : false,
-          speaker: seg.speaker || 'Unknown',
-          text: seg.text || '',
-          tone: seg.tone || 'Neutral'
+          timestamp: seg.timestamp || "00:00",
+          ad: typeof seg.ad === "boolean" ? seg.ad : false,
+          speaker: seg.speaker || "Unknown",
+          text: seg.text || "",
+          tone: seg.tone || "Neutral",
         }));
       } catch (parseError) {
-        console.warn(`Failed to parse JSON response for chunk ${chunk.index}, using fallback`);
+        console.warn(
+          `Failed to parse JSON response for chunk ${chunk.index}, using fallback`
+        );
         // Fallback: create a single segment with the entire text
-        segments = [{
-          timestamp: '00:00',
-          ad: false,
-          speaker: 'Unknown',
-          text: text.trim(),
-          tone: 'Unknown'
-        }];
+        segments = [
+          {
+            timestamp: "00:00",
+            ad: false,
+            speaker: "Unknown",
+            text: text.trim(),
+            tone: "Unknown",
+          },
+        ];
       }
 
-      console.log(`Chunk ${chunk.index} transcribed successfully with ${segments.length} segments`);
+      console.log(
+        `Chunk ${chunk.index} transcribed successfully with ${segments.length} segments`
+      );
 
       return {
         chunkIndex: chunk.index,
         startTime: chunk.startTime,
         endTime: chunk.startTime + chunk.duration,
-        segments: segments
+        segments: segments,
       };
-
     } catch (error) {
       console.error(`Failed to transcribe chunk ${chunk.index}:`, error);
-      
+
       // Return fallback with error message
       return {
         chunkIndex: chunk.index,
         startTime: chunk.startTime,
         endTime: chunk.startTime + chunk.duration,
-        segments: [{
-          timestamp: '00:00',
-          ad: false,
-          speaker: 'System',
-          text: `Error transcribing audio: ${(error as Error).message}`,
-          tone: 'Neutral'
-        }]
+        segments: [
+          {
+            timestamp: "00:00",
+            ad: false,
+            speaker: "System",
+            text: `Error transcribing audio: ${(error as Error).message}`,
+            tone: "Neutral",
+          },
+        ],
       };
     }
   }
 
-  async transcribeAllChunks(chunks: AudioChunk[]): Promise<ChunkTranscription[]> {
-    console.log(`Starting transcription of ${chunks.length} chunks...`);
+  async transcribeAllChunks(
+    chunks: AudioChunk[],
+    concurrency: number = 5
+  ): Promise<ChunkTranscription[]> {
+    console.log(
+      `Starting transcription of ${chunks.length} chunks with concurrency of ${concurrency}...`
+    );
 
-    // Process chunks sequentially to avoid rate limiting
-    // You can adjust this to parallel processing if your API allows
     const transcriptions: ChunkTranscription[] = [];
-    
+    const inProgress = new Set<Promise<void>>();
+
+    // Process chunks with controlled concurrency
     for (const chunk of chunks) {
-      try {
-        const transcription = await this.transcribeChunk(chunk);
-        transcriptions.push(transcription);
-        
-        // Add a small delay to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } catch (error) {
-        console.error(`Error transcribing chunk ${chunk.index}:`, error);
-        // Continue with other chunks even if one fails
+      // Wait if we've reached the concurrency limit
+      if (inProgress.size >= concurrency) {
+        await Promise.race(inProgress);
       }
+
+      // Start processing this chunk
+      const chunkPromise = this.processChunkWithDelay(chunk, transcriptions);
+      inProgress.add(chunkPromise);
+
+      // Remove from in-progress set when done
+      chunkPromise.finally(() => {
+        inProgress.delete(chunkPromise);
+      });
     }
 
-    console.log(`Transcription completed. Successfully transcribed ${transcriptions.length}/${chunks.length} chunks`);
+    // Wait for all remaining chunks to complete
+    await Promise.all(inProgress);
+
+    console.log(
+      `Transcription completed. Successfully transcribed ${transcriptions.length}/${chunks.length} chunks`
+    );
     return transcriptions;
+  }
+
+  private async processChunkWithDelay(
+    chunk: AudioChunk,
+    transcriptions: ChunkTranscription[]
+  ): Promise<void> {
+    try {
+      const transcription = await this.transcribeChunk(chunk);
+      transcriptions.push(transcription);
+
+      // Add a small delay to avoid rate limiting (reduced since we're processing in parallel)
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    } catch (error) {
+      console.error(`Error transcribing chunk ${chunk.index}:`, error);
+      // Continue with other chunks even if one fails
+    }
   }
 }

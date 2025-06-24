@@ -30,7 +30,7 @@ export interface AudioChunk {
 
 export interface DownloadOptions {
   outputPath: string;
-  format?: 'mp3' | 'wav';
+  format?: "mp3" | "wav";
 }
 
 export interface TranscriptionOptions {
@@ -46,4 +46,5 @@ export interface ProcessingOptions {
   keepChunks?: boolean;
   saveAllTempFiles?: boolean; // Save all temporary files, including raw audio, downsampled audio, etc.
   chunkDuration?: number; // in seconds, default 600 (10 minutes)
+  concurrency?: number; // number of chunks to process in parallel during transcription, default 3
 }
