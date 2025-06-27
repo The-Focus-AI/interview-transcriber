@@ -13,7 +13,7 @@
     "test": "jest",
     "clean": "rm -rf dist temp/*",
     "demo:parallel": "ts-node examples/parallel-processing-demo.ts",
-    "server": "~/The-Focus-AI/shell-job-queue/processjobqueue run.sh"
+    "server": "DEBUG=1 ~/The-Focus-AI/shell-job-queue/processjobqueue ./run.sh"
   },
   "keywords": [
     "audio",
