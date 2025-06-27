@@ -189,7 +189,7 @@ If a speaker's name is mentioned at any point, use that name for all their utter
       });
     }
     await Promise.all(inProgress);
-    console.log(
+    console.error(
       `Transcription completed. Successfully transcribed ${transcriptions.length}/${chunks.length} chunks`
     );
     return transcriptions;
