@@ -12,6 +12,12 @@ export interface FinalOutput {
   full_transcript: TranscriptSegment[];
   highlights: string[];
   summary: string;
+  description: string;
+  duration?: number;
+  people?: string[];
+  topics?: string[];
+  thumbnail?: string;
+  date?: string;
 }
 
 export interface ChunkTranscription {

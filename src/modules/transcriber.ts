@@ -54,11 +54,11 @@ export class Transcriber {
       const prompt = `Please transcribe this audio file as a flat list of utterances. For each utterance, provide:
 - "timestamp": string, in mm:ss format, relative to the start of this chunk
 - "ad": boolean, true if this is an ad section, otherwise false
-- "speaker": string, the speaker's name or label
+- "speaker": string, the speaker's real name if mentioned, or a consistent role label (e.g., Host, Guest, Interviewer, Interviewee). If the name is not clear, use a consistent label across all chunks (e.g., Speaker A, Speaker B). Do NOT use generic labels like 'Speaker 1' or 'Speaker 2'.
 - "text": string, the transcribed text
 - "tone": string, the conversation tone
 
-Format your response as a JSON array, with no text before or after the array. Example:
+If a speaker's name is mentioned at any point, use that name for all their utterances in this chunk. If not, use a consistent role or label. Format your response as a JSON array, with no text before or after the array. Example:
 [
   {
     "timestamp": "00:00",
@@ -70,7 +70,7 @@ Format your response as a JSON array, with no text before or after the array. Ex
   {
     "timestamp": "00:12",
     "ad": false,
-    "speaker": "Guest",
+    "speaker": "Jane Doe",
     "text": "Thank you for having me.",
     "tone": "happy"
   }
@@ -174,4 +174,44 @@ Format your response as a JSON array, with no text before or after the array. Ex
     console.log(`Transcription completed. Successfully transcribed ${transcriptions.length}/${chunks.length} chunks`);
     return transcriptions;
   }
+}
+
+// Add a normalization function to ensure speaker name consistency across all segments
+export function normalizeSpeakerNames(segments: TranscriptSegment[]): TranscriptSegment[] {
+  // Collect all unique speaker labels
+  const speakerCounts: Record<string, number> = {};
+  for (const seg of segments) {
+    const label = seg.speaker.trim();
+    if (!speakerCounts[label]) speakerCounts[label] = 0;
+    speakerCounts[label]++;
+  }
+  // Sort speakers by frequency (most common first)
+  const sortedSpeakers = Object.entries(speakerCounts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name]) => name);
+
+  // Map similar/variant labels to canonical names (simple heuristic: exact match, case-insensitive, or role-based)
+  const canonicalMap: Record<string, string> = {};
+  let canonicalLabels: string[] = [];
+  for (const name of sortedSpeakers) {
+    // Try to find a canonical label already present (case-insensitive match)
+    const existing = canonicalLabels.find(
+      c => c.toLowerCase() === name.toLowerCase()
+    );
+    if (existing) {
+      canonicalMap[name] = existing;
+    } else {
+      canonicalMap[name] = name;
+      canonicalLabels.push(name);
+    }
+  }
+
+  // Optionally, map generic labels to roles if possible (e.g., Speaker A -> Guest)
+  // This can be extended with more advanced heuristics if needed
+
+  // Replace all speaker labels in segments with their canonical name
+  return segments.map(seg => ({
+    ...seg,
+    speaker: canonicalMap[seg.speaker.trim()] || seg.speaker
+  }));
 }

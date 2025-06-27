@@ -70,9 +70,19 @@ export class AudioProcessor {
       // Step 2: Get video/audio metadata
       console.log('\n📊 STEP 2: Getting metadata...');
       let title = 'Unknown Title';
+      let description = '';
+      let duration: number | undefined = undefined;
+      let thumbnail: string | undefined = undefined;
+      let date: string | undefined = undefined;
+      let people: string[] = [];
+      let topics: string[] = [];
       try {
         const metadata = await this.downloader.getVideoInfo(options.url);
         title = metadata.title || metadata.fulltitle || 'Unknown Title';
+        description = metadata.description || '';
+        duration = metadata.duration;
+        thumbnail = metadata.thumbnail;
+        date = metadata.upload_date || metadata.release_date;
         console.log(`Title: ${title}`);
       } catch (error) {
         console.warn('⚠️ Could not fetch metadata, using default title');
@@ -166,7 +176,7 @@ export class AudioProcessor {
       
       try {
         mergedSegments = this.merger.mergeTranscriptions(chunkTranscriptions);
-        identifiedSegments = this.merger.identifySpeakers(mergedSegments);
+        identifiedSegments = this.merger.normalizeSpeakers(mergedSegments);
         stepStatus.merged = true;
       } catch (error) {
         console.error(`❌ Merging failed: ${(error as Error).message}`);
@@ -217,14 +227,33 @@ export class AudioProcessor {
         summary = "Summary generation failed. See transcript for details.";
       }
 
+      // Step 7.5: Extract people and topics using Gemini
+      let peopleAndTopics: { people: string[]; topics: string[] } = { people: [], topics: [] };
+      try {
+        peopleAndTopics = await this.highlightsExtractor.extractPeopleAndTopics(identifiedSegments, description || summary);
+        people = peopleAndTopics.people;
+        topics = peopleAndTopics.topics;
+      } catch (error) {
+        console.error(`❌ People/topics extraction failed: ${(error as Error).message}`);
+        // Fallback: leave as empty arrays
+      }
+
       // Step 8: Build final output
-      console.log('\n📝 STEP 8: Building final output...');
+      console.log('\n📦 STEP 8: Building final output...');
       const finalOutput = await this.outputBuilder.buildOutput(
         title,
         options.url,
         identifiedSegments,
         highlights,
-        summary
+        summary,
+        {
+          description: description || summary,
+          duration,
+          people,
+          topics,
+          thumbnail,
+          date
+        }
       );
 
       // Step 9: Save output files

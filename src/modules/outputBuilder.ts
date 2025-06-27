@@ -3,22 +3,71 @@ import * as path from 'path';
 import { FinalOutput, TranscriptSegment } from '../types';
 import { ensureDir } from '../utils/fileUtils';
 
+function extractNamesFromText(text: string): string[] {
+  // Simple regex for capitalized names (First Last)
+  const nameRegex = /\b([A-Z][a-z]+\s+[A-Z][a-z]+)\b/g;
+  const matches = text.match(nameRegex) || [];
+  // Remove duplicates
+  return Array.from(new Set(matches));
+}
+
+function limitTopics(topics: string[], max: number = 5): string[] {
+  return topics.slice(0, max);
+}
+
 export class OutputBuilder {
   async buildOutput(
     title: string,
     sourceUrl: string,
     segments: TranscriptSegment[],
     highlights: string[],
-    summary: string
+    summary: string,
+    {
+      description,
+      duration,
+      people,
+      topics,
+      thumbnail,
+      date
+    }: {
+      description?: string;
+      duration?: number;
+      people?: string[];
+      topics?: string[];
+      thumbnail?: string;
+      date?: string;
+    } = {}
   ): Promise<FinalOutput> {
     console.log('Building final output...');
+
+    // Extract names from description and add to people if not already present
+    let allPeople = people ? [...people] : [];
+    if (description) {
+      const namesInDescription = extractNamesFromText(description);
+      for (const name of namesInDescription) {
+        if (!allPeople.includes(name)) {
+          allPeople.push(name);
+        }
+      }
+    }
+    // Remove duplicates
+    allPeople = Array.from(new Set(allPeople));
+
+    // Limit topics to top 3-5
+    const limitedTopics = topics ? limitTopics(topics, 5) : [];
 
     const output: FinalOutput = {
       title: title,
       source_url: sourceUrl,
       full_transcript: segments,
       highlights: highlights,
-      summary: summary
+      summary: summary,
+      description: description || summary,
+      duration,
+      people: allPeople,
+      topics: limitedTopics,
+      thumbnail,
+      date
     };
 
     return output;
@@ -96,6 +145,30 @@ export class OutputBuilder {
     report += 'SUMMARY\n';
     report += '-------\n';
     report += `${output.summary}\n\n`;
+
+    report += 'DESCRIPTION\n';
+    report += '-----------\n';
+    report += `${output.description || ''}\n\n`;
+
+    report += 'DURATION\n';
+    report += '--------\n';
+    report += `${output.duration ? output.duration + ' seconds' : 'N/A'}\n\n`;
+
+    report += 'PEOPLE\n';
+    report += '------\n';
+    report += `${output.people && output.people.length > 0 ? output.people.join(', ') : 'N/A'}\n\n`;
+
+    report += 'TOPICS\n';
+    report += '------\n';
+    report += `${output.topics && output.topics.length > 0 ? output.topics.join(', ') : 'N/A'}\n\n`;
+
+    report += 'THUMBNAIL\n';
+    report += '---------\n';
+    report += `${output.thumbnail || 'N/A'}\n\n`;
+
+    report += 'DATE\n';
+    report += '----\n';
+    report += `${output.date || 'N/A'}\n\n`;
 
     report += 'KEY HIGHLIGHTS\n';
     report += '--------------\n';

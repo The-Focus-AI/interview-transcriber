@@ -1,5 +1,6 @@
 import { ChunkTranscription, TranscriptSegment } from '../types';
 import { adjustTimestamp, timestampToSeconds, secondsToTimestamp } from '../utils/timeUtils';
+import { normalizeSpeakerNames } from './transcriber';
 
 export class Merger {
   mergeTranscriptions(chunkTranscriptions: ChunkTranscription[]): TranscriptSegment[] {
@@ -32,41 +33,8 @@ export class Merger {
     return allSegments;
   }
 
-  identifySpeakers(segments: TranscriptSegment[]): TranscriptSegment[] {
-    console.log('Attempting to identify consistent speakers across segments...');
-
-    // This is a simple implementation that tries to maintain speaker consistency
-    // In a real-world scenario, you might use voice fingerprinting or more advanced techniques
-
-    const speakerMap = new Map<string, string>();
-    let speakerCounter = 1;
-
-    return segments.map(segment => {
-      // If speaker is already identified with a number, keep it
-      if (segment.speaker && /^Speaker \d+$/.test(segment.speaker)) {
-        return segment;
-      }
-
-      // If speaker is unknown or generic, assign a consistent label
-      if (!segment.speaker || segment.speaker === 'Unknown') {
-        if (!speakerMap.has('default')) {
-          speakerMap.set('default', `Speaker ${speakerCounter++}`);
-        }
-        return {
-          ...segment,
-          speaker: speakerMap.get('default')!
-        };
-      }
-
-      // For other speaker labels, maintain consistency
-      if (!speakerMap.has(segment.speaker)) {
-        speakerMap.set(segment.speaker, `Speaker ${speakerCounter++}`);
-      }
-
-      return {
-        ...segment,
-        speaker: speakerMap.get(segment.speaker)!
-      };
-    });
+  normalizeSpeakers(segments: TranscriptSegment[]): TranscriptSegment[] {
+    console.log('Normalizing speaker names across all segments...');
+    return normalizeSpeakerNames(segments);
   }
 }

@@ -273,4 +273,47 @@ ${transcriptText}`;
 
     return sortedWords;
   }
+
+  async extractPeopleAndTopics(segments: TranscriptSegment[], description: string): Promise<{ people: string[], topics: string[] }> {
+    console.log('Extracting people and topics using Gemini...');
+    // Prepare transcript text (limit to 500 segments for token safety)
+    const maxSegments = 500;
+    const usedSegments = segments.length > maxSegments
+      ? [
+          ...segments.slice(0, Math.floor(maxSegments/2)),
+          ...segments.slice(segments.length - Math.floor(maxSegments/2))
+        ]
+      : segments;
+    const transcriptText = usedSegments
+      .map(s => `[${s.timestamp}] ${s.speaker}: ${s.text}`)
+      .join('\n\n');
+    const prompt = `Given the following podcast transcript and description, extract:
+1. The real names (or consistent labels) of the two main speakers (the people who are actually speaking in the transcript). Do NOT include people who are only mentioned or referenced but do not speak.
+2. The 3-5 major topics discussed in the episode (not minor or tangential topics).
+
+Return your answer as a JSON object with two fields: "people" (array of names, length 2) and "topics" (array of topics).
+
+Transcript:
+${transcriptText}
+
+Description:
+${description}
+
+Respond ONLY with the JSON object.`;
+
+    const operation = async () => {
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text().trim();
+      // Try to extract JSON from the response
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('No JSON object found in Gemini response');
+      return JSON.parse(jsonMatch[0]);
+    };
+
+    return await this.retryWithExponentialBackoff(
+      operation,
+      'Failed to extract people and topics from Gemini'
+    );
+  }
 }
