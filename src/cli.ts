@@ -83,7 +83,7 @@ program
 
       // Print the final JSON to stdout
       process.stdout.write(JSON.stringify(result, null, 2) + "\n");
-      origLog("\n🎉 Success! Transcription completed.");
+      console.error("\n🎉 Success! Transcription completed.");
     } catch (error) {
       console.error("\n❌ Error:", (error as Error).message);
       if (process.env.DEBUG) {
