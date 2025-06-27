@@ -28,25 +28,27 @@ A powerful Node.js tool to download audio from YouTube or podcast URLs, transcri
    npm install -g pnpm
    ```
 3. **yt-dlp** - For YouTube downloads
+
    ```bash
    # macOS
    brew install yt-dlp
-   
+
    # Ubuntu/Debian
    sudo apt install yt-dlp
-   
+
    # Windows
    # Download from https://github.com/yt-dlp/yt-dlp/releases
    ```
 
 4. **ffmpeg** - For audio processing
+
    ```bash
    # macOS
    brew install ffmpeg
-   
+
    # Ubuntu/Debian
    sudo apt install ffmpeg
-   
+
    # Windows
    # Download from https://ffmpeg.org/download.html
    ```
@@ -93,7 +95,9 @@ Options:
   -o, --output <path>           Output file path (default: ./output/transcript_[timestamp].json)
   -t, --temp-dir <path>         Temporary directory for processing (default: ./temp)
   -c, --chunk-duration <secs>   Duration of each chunk in seconds (default: 600)
+  --concurrency <number>        Number of chunks to process in parallel during transcription (default: 5)
   -k, --keep-chunks             Keep temporary audio chunks after processing
+  -s, --save-temp-files         Keep all temporary files including raw audio, downsampled audio, chunks, and intermediate files
   --no-text                     Skip generating text transcript file
   --no-report                   Skip generating metadata report file
   -h, --help                    Display help for command
@@ -120,6 +124,7 @@ pnpm clean
 The tool generates three types of output files:
 
 ### 1. JSON Output (`transcript_*.json`)
+
 ```json
 {
   "title": "Video/Audio Title",
@@ -133,19 +138,19 @@ The tool generates three types of output files:
       "text": "Transcribed text..."
     }
   ],
-  "highlights": [
-    "Key point 1",
-    "Key point 2"
-  ],
+  "highlights": ["Key point 1", "Key point 2"],
   "summary": "Comprehensive summary..."
 }
 ```
 
 ### 2. Text Transcript (`transcript_*.txt`)
+
 A formatted, readable transcript with timestamps, speakers, and tone information.
 
 ### 3. Metadata Report (`transcript_*_report.txt`)
+
 A summary report containing:
+
 - Title and source information
 - Executive summary
 - Key highlights
@@ -200,6 +205,7 @@ docker run --rm \
 ```
 
 ### Notes
+
 - The `GEMINI_API_KEY` environment variable is required for Google Gemini transcription.
 - The `/output` directory inside the container should be mounted to a local directory to access results.
 - All other CLI options are supported as in the native usage.
@@ -209,14 +215,15 @@ docker run --rm \
 You can also use the modules programmatically:
 
 ```typescript
-import { AudioProcessor } from 'audio-transcriber';
+import { AudioProcessor } from "audio-transcriber";
 
 const processor = new AudioProcessor();
 
 const options = {
-  url: 'https://www.youtube.com/watch?v=VIDEO_ID',
-  outputPath: './output/my-transcript.json',
-  chunkDuration: 600 // 10 minutes
+  url: "https://www.youtube.com/watch?v=VIDEO_ID",
+  outputPath: "./output/my-transcript.json",
+  chunkDuration: 600, // 10 minutes
+  concurrency: 5, // Process 5 chunks in parallel
 };
 
 const result = await processor.processAudio(options);
@@ -252,6 +259,7 @@ audio-transcriber/
 ## Error Handling
 
 The tool includes comprehensive error handling for:
+
 - Network failures (with retry logic)
 - Invalid URLs
 - API rate limiting
@@ -262,7 +270,8 @@ The tool includes comprehensive error handling for:
 
 - **Chunk Duration**: Default is 10 minutes. Shorter chunks = more API calls but better accuracy
 - **API Rate Limiting**: The tool includes delays between API calls to avoid rate limiting
-- **Parallel Processing**: Chunks are processed sequentially by default to avoid API limits
+- **Parallel Processing**: Chunks are processed in parallel with configurable concurrency (default: 5). Higher concurrency = faster processing but may hit API rate limits
+- **Concurrency Control**: Use the `--concurrency` option to adjust parallel processing. Start with 5 for most use cases
 
 ## Troubleshooting
 
@@ -270,11 +279,10 @@ The tool includes comprehensive error handling for:
 
 1. **"GEMINI_API_KEY not found"**
    - Make sure you've created a `.env` file with your API key
-   
 2. **"yt-dlp not found"**
    - Install yt-dlp using the instructions above
-   
 3. **"ffmpeg not found"**
+
    - Install ffmpeg using the instructions above
 
 4. **Transcription fails**
