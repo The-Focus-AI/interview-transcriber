@@ -24,3 +24,7 @@ outputs = ['node_modules/.pnpm/lock.yaml']
 description = 'Calls your dev script in `package.json`'
 run = 'node --run dev'
 depends = ['pnpm-install']
+
+[tasks.extract-youtube-cookies]
+description = 'Extract YouTube cookies in Netscape format using Playwright'
+run = 'npx tsx scripts/extract-youtube-cookies.ts'
