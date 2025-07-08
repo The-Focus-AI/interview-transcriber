@@ -74,6 +74,11 @@ export class AudioDownloader {
       '--embed-thumbnail',
     ];
 
+    // Add cookies option if provided
+    if (options.cookiesPath) {
+      ytDlpOptions.push('--cookies', options.cookiesPath);
+    }
+
     return new Promise((resolve, reject) => {
       const ytDlpProcess = this.ytDlpWrap
         .exec(ytDlpOptions)

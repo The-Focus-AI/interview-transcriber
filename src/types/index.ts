@@ -37,6 +37,7 @@ export interface AudioChunk {
 export interface DownloadOptions {
   outputPath: string;
   format?: "mp3" | "wav";
+  cookiesPath?: string; // Optional path to cookies.txt for yt-dlp
 }
 
 export interface TranscriptionOptions {

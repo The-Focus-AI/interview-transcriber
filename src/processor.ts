@@ -103,6 +103,7 @@ export class AudioProcessor {
           outputPath: audioPath,
           format: "mp3",
           showProgress: false,
+          cookiesPath: "cookies.txt", // Pass cookies.txt for yt-dlp authentication
         });
         stepStatus.download = true;
       } catch (error) {
