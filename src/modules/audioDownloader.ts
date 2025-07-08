@@ -79,6 +79,8 @@ export class AudioDownloader {
       ytDlpOptions.push('--cookies', options.cookiesPath);
     }
 
+    console.error(`yt-dlp options: ${ytDlpOptions.join(' ')}`);
+
     return new Promise((resolve, reject) => {
       const ytDlpProcess = this.ytDlpWrap
         .exec(ytDlpOptions)

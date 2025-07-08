@@ -17,7 +17,7 @@ temp/
 # Output files
 output/
 *.json
-*.txt
+
 !package.json
 !tsconfig.json
 !jest.config.js

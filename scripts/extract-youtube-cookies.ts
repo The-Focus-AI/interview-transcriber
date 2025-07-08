@@ -13,8 +13,8 @@ function toNetscapeCookieFormat(cookies: any[]): string {
     const path = cookie.path || '/';
     // secure
     const secure = cookie.secure ? 'TRUE' : 'FALSE';
-    // expiration (in seconds)
-    const expires = cookie.expires ? Math.floor(cookie.expires) : 0;
+    // expiration (in seconds); 0 for session cookies
+    const expires = (cookie.expires && cookie.expires > 0) ? Math.floor(cookie.expires) : 0;
     // name and value
     const name = cookie.name || '';
     const value = cookie.value || '';
