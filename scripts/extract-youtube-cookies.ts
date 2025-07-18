@@ -28,7 +28,22 @@ function toNetscapeCookieFormat(cookies: any[]): string {
   const context = await browser.newContext();
   const page = await context.newPage();
   await page.goto('https://www.youtube.com');
-  await page.waitForTimeout(5000);
+  await page.waitForTimeout(3000);
+
+  // Use the search bar to look up 'gandam style'
+  await page.waitForSelector('input[name="search_query"]', { timeout: 10000 });
+  await page.fill('input[name="search_query"]', 'gandam style');
+  // Click the search button
+  await page.click('button[aria-label="Search"]');
+  // Wait for search results to appear instead of navigation
+  await page.waitForSelector('ytd-item-section-renderer', { timeout: 10000 });
+  await page.waitForTimeout(2000);
+
+  // Output the HTML to a file for inspection (optional, can be removed later)
+  // const html = await page.content();
+  // writeFileSync('youtube-home.html', html);
+  // console.log('YouTube homepage HTML written to youtube-home.html');
+
   const cookies = await context.cookies('https://www.youtube.com');
   const netscapeCookies = toNetscapeCookieFormat(cookies);
   writeFileSync('cookies.txt', netscapeCookies);

@@ -1,10 +1,10 @@
 # Interview Transcriber 🎙️
 
-A powerful Node.js tool to download audio from YouTube or podcast URLs, transcribe using Google Gemini AI, and generate comprehensive summaries with speaker identification and tone analysis.
+A powerful Node.js tool to download audio from YouTube, Spotify, or podcast URLs, transcribe using Google Gemini AI, and generate comprehensive summaries with speaker identification and tone analysis.
 
 ## Features
 
-- 📥 **Download audio** from YouTube videos or direct MP3 URLs
+- 📥 **Download audio** from YouTube videos, Spotify episodes/podcasts, or direct MP3 URLs
 - ✂️ **Smart chunking** - Splits long audio into manageable 10-minute segments
 - 🎯 **Advanced transcription** using Google Gemini AI with:
   - Speaker identification
@@ -40,6 +40,8 @@ A powerful Node.js tool to download audio from YouTube or podcast URLs, transcri
    # Download from https://github.com/yt-dlp/yt-dlp/releases
    ```
 
+   **Note**: Spotify support is handled automatically through the integrated `spotify-dl` package - no additional installation required.
+
 4. **ffmpeg** - For audio processing
 
    ```bash
@@ -71,6 +73,23 @@ cp .env.example .env
 # Edit .env and add your GEMINI_API_KEY
 ```
 
+## Supported Platforms
+
+### YouTube
+- Videos, playlists, channels
+- Automatic audio extraction
+- Metadata preservation
+
+### Spotify
+- Episodes and podcasts
+- Automatically finds matching content on YouTube
+- Preserves original metadata and structure
+- No authentication required for most content
+
+### Direct MP3 URLs
+- Any publicly accessible MP3 file
+- Direct download without conversion
+
 ## Usage
 
 ### Basic Usage
@@ -78,6 +97,9 @@ cp .env.example .env
 ```bash
 # Transcribe a YouTube video
 pnpm dev "https://www.youtube.com/watch?v=VIDEO_ID"
+
+# Transcribe a Spotify episode/podcast
+pnpm dev "https://open.spotify.com/episode/EPISODE_ID"
 
 # Transcribe a direct MP3 URL
 pnpm dev "https://example.com/podcast.mp3"
@@ -170,10 +192,17 @@ docker build -t interview-transcriber .
 ### Run the container
 
 ```bash
+# YouTube video
 docker run --rm \
   -e GEMINI_API_KEY=your_actual_api_key \
   -v $(pwd)/output:/output \
   interview-transcriber "https://www.youtube.com/watch?v=VIDEO_ID"
+
+# Spotify episode
+docker run --rm \
+  -e GEMINI_API_KEY=your_actual_api_key \
+  -v $(pwd)/output:/output \
+  interview-transcriber "https://open.spotify.com/episode/EPISODE_ID"
 ```
 
 - This will save the transcript in your local `output/` directory.
@@ -198,10 +227,17 @@ GEMINI_API_KEY=your_actual_api_key
 Then run the container with:
 
 ```bash
+# YouTube video
 docker run --rm \
   --env-file .env \
   -v $(pwd)/output:/output \
   interview-transcriber "https://www.youtube.com/watch?v=VIDEO_ID"
+
+# Spotify episode
+docker run --rm \
+  --env-file .env \
+  -v $(pwd)/output:/output \
+  interview-transcriber "https://open.spotify.com/episode/EPISODE_ID"
 ```
 
 ### Notes
@@ -237,6 +273,7 @@ audio-transcriber/
 ├── src/
 │   ├── modules/
 │   │   ├── audioDownloader.ts    # YouTube/MP3 download logic
+│   │   ├── spotifyDownloader.ts  # Spotify download logic
 │   │   ├── audioChunker.ts       # Audio splitting with ffmpeg
 │   │   ├── transcriber.ts        # Gemini AI transcription
 │   │   ├── merger.ts             # Chunk merging logic
@@ -302,5 +339,6 @@ MIT
 
 - Google Gemini AI for transcription capabilities
 - yt-dlp for YouTube download functionality
+- [spotify-dl](https://github.com/SwapnilSoni1999/spotify-dl) by SwapnilSoni1999 for Spotify support
 - ffmpeg for audio processing
 - The open-source community for various dependencies

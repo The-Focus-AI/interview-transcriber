@@ -4,6 +4,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { DownloadOptions as BaseDownloadOptions } from '../types';
 import { fileExists } from '../utils/fileUtils';
+import { SpotifyDownloader } from './spotifyDownloader';
 
 export interface DownloadOptions extends BaseDownloadOptions {
   showProgress?: boolean;
@@ -11,16 +12,23 @@ export interface DownloadOptions extends BaseDownloadOptions {
 
 export class AudioDownloader {
   private ytDlpWrap: YTDlpWrap;
+  private spotifyDownloader: SpotifyDownloader;
 
   constructor(ytDlpPath?: string) {
     this.ytDlpWrap = new YTDlpWrap(ytDlpPath);
+    this.spotifyDownloader = new SpotifyDownloader();
   }
 
   async downloadAudio(url: string, options: DownloadOptions): Promise<string> {
     try {
-      // Check if it's a YouTube URL or direct MP3 URL
+      // Check if it's a direct MP3 URL
       if (this.isDirectMP3Url(url)) {
         return await this.downloadDirectMP3(url, options.outputPath, options.showProgress);
+      } else if (this.isSpotifyUrl(url)) {
+        return await this.spotifyDownloader.downloadAudio(url, {
+          outputPath: options.outputPath,
+          showProgress: options.showProgress
+        });
       } else {
         return await this.downloadYouTubeAudio(url, options);
       }
@@ -31,6 +39,10 @@ export class AudioDownloader {
 
   private isDirectMP3Url(url: string): boolean {
     return url.toLowerCase().endsWith('.mp3') || url.includes('.mp3?');
+  }
+
+  private isSpotifyUrl(url: string): boolean {
+    return url.includes('open.spotify.com');
   }
 
   private async downloadDirectMP3(url: string, outputPath: string, showProgress = false): Promise<string> {
@@ -56,6 +68,7 @@ export class AudioDownloader {
       writer.on('error', reject);
     });
   }
+
 
   private async downloadYouTubeAudio(url: string, options: DownloadOptions): Promise<string> {
     console.error(`Downloading audio from YouTube: ${url}`);
@@ -115,8 +128,12 @@ export class AudioDownloader {
 
   async getVideoInfo(url: string): Promise<any> {
     try {
-      const metadata = await this.ytDlpWrap.getVideoInfo(url);
-      return metadata;
+      if (this.isSpotifyUrl(url)) {
+        return await this.spotifyDownloader.getTrackInfo(url);
+      } else {
+        const metadata = await this.ytDlpWrap.getVideoInfo(url);
+        return metadata;
+      }
     } catch (error) {
       throw new Error(`Failed to get video info: ${(error as Error).message}`);
     }

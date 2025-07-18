@@ -26,6 +26,7 @@
   "license": "MIT",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@swapnilsoni1999/spotify-dl": "github:SwapnilSoni1999/spotify-dl",
     "axios": "^1.6.0",
     "commander": "^11.1.0",
     "dotenv": "^16.3.1",

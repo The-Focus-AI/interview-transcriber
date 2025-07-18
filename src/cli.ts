@@ -9,7 +9,7 @@ const program = new Command();
 
 program
   .name("audio-transcriber")
-  .description("YouTube/Podcast Audio Downloader, Transcriber & Summarizer")
+  .description("YouTube/Spotify/Podcast Audio Downloader, Transcriber & Summarizer")
   .version("1.0.0");
 
 // Redirect all logs to stderr except for final output
@@ -23,7 +23,7 @@ console.warn = (...args: any[]) => {
 };
 
 program
-  .argument("<url>", "YouTube URL or direct MP3 URL to process")
+  .argument("<url>", "YouTube, Spotify, or direct MP3 URL to process")
   .option(
     "-o, --output <path>",
     "Output file path (default: ./output/transcript_[timestamp].json)"
@@ -54,6 +54,16 @@ program
       // Validate URL
       if (!url.startsWith("http://") && !url.startsWith("https://")) {
         console.error("❌ Error: Please provide a valid URL");
+        process.exit(1);
+      }
+      
+      // Check for supported platforms
+      const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+      const isSpotify = url.includes('open.spotify.com');
+      const isDirectMP3 = url.toLowerCase().endsWith('.mp3') || url.includes('.mp3?');
+      
+      if (!isYouTube && !isSpotify && !isDirectMP3) {
+        console.error("❌ Error: Unsupported URL. Please provide a YouTube, Spotify, or direct MP3 URL");
         process.exit(1);
       }
 
