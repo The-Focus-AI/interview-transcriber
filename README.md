@@ -246,6 +246,36 @@ docker run --rm \
 - The `/output` directory inside the container should be mounted to a local directory to access results.
 - All other CLI options are supported as in the native usage.
 
+## Fly.io + YouTube
+
+Running yt-dlp from Fly.io (or most cloud/DC IP ranges) can trigger YouTube anti-bot and consent checks. To improve reliability, this project supports the following env vars (set them as Fly secrets):
+
+- `YTDLP_FORCE_IPV4`: true to force IPv4. Some IPv6 pools are scrutinized.
+- `YTDLP_PROXY`: HTTP/SOCKS proxy (residential/backconnect recommended), e.g. `http://user:pass@host:port`.
+- `YTDLP_PLAYER_CLIENT`: defaults to `android` (often less strict). Options: `web`, `android`, `ios`, `tv`.
+- `YTDLP_EXTRACTOR_ARGS`: override extractor args. Default: `youtube:player_client=${YTDLP_PLAYER_CLIENT},player_skip=webpage`.
+- `YTDLP_USER_AGENT`: override UA; defaults to a YouTube Android UA when `android` client is used.
+- `YTDLP_GEO_BYPASS_COUNTRY`: e.g. `US`.
+- `YTDLP_RETRIES` / `YTDLP_FRAGMENT_RETRIES`: retry counts (defaults 5 / 5).
+- `YTDLP_SLEEP_REQUESTS` / `YTDLP_MAX_SLEEP_REQUESTS`: add randomized delays between requests.
+- `YTDLP_COOKIES_BASE64`: base64-encoded Netscape cookie file. Written to `/data/cookies.txt`.
+- `YTDLP_DISABLE_COOKIE_REFRESH`: set to `true` on Fly to disable Playwright-based cookie refresh inside the container.
+
+Suggested setup on Fly:
+
+- Disable in-container cookie refresh and force IPv4:
+  `fly secrets set YTDLP_DISABLE_COOKIE_REFRESH=true YTDLP_FORCE_IPV4=true`
+- Provide cookies from outside the container (export locally, base64, then set):
+  `fly secrets set YTDLP_COOKIES_BASE64=$(base64 -i cookies.txt)`
+- If still blocked, use a residential/backconnect proxy:
+  `fly secrets set YTDLP_PROXY=http://user:pass@host:port`
+
+Notes:
+
+- IP reputation is the biggest factor; cookies alone won’t always bypass bot checks.
+- For private/age-restricted content, cookies must be from an authenticated session that passed consent.
+- Consider offering a manual upload fallback if direct download fails repeatedly.
+
 ## API Usage
 
 You can also use the modules programmatically:

@@ -24,7 +24,8 @@ function toNetscapeCookieFormat(cookies: any[]): string {
 }
 
 (async () => {
-  const browser = await chromium.launch({ headless: false });
+  const headless = (process.env.HEADLESS || 'true').toLowerCase() !== 'false';
+  const browser = await chromium.launch({ headless });
   const context = await browser.newContext();
   const page = await context.newPage();
   await page.goto('https://www.youtube.com');
@@ -46,7 +47,10 @@ function toNetscapeCookieFormat(cookies: any[]): string {
 
   const cookies = await context.cookies('https://www.youtube.com');
   const netscapeCookies = toNetscapeCookieFormat(cookies);
-  writeFileSync('cookies.txt', netscapeCookies);
-  console.log('Cookies written to cookies.txt in Netscape format');
+  
+  // Use environment variable for output path, fallback to cookies.txt
+  const outputPath = process.env.COOKIE_OUTPUT_PATH || 'cookies.txt';
+  writeFileSync(outputPath, netscapeCookies);
+  console.log(`Cookies written to ${outputPath} in Netscape format`);
   await browser.close();
 })(); 
