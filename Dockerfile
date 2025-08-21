@@ -26,6 +26,10 @@ RUN apt-get update && \
 # Install pnpm
 RUN npm install -g pnpm
 
+# Install Playwright browsers
+RUN npx playwright install chromium
+
+
 # Set workdir
 WORKDIR /app
 

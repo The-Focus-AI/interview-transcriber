@@ -189,6 +189,7 @@ export class AudioDownloader {
   private async ensureFreshCookies(providedCookiePath?: string): Promise<string | null> {
     // If user provided a specific cookie path, use it as-is
     if (providedCookiePath) {
+      console.error(`🍪 Using provided cookie path: ${providedCookiePath}`);
       return providedCookiePath;
     }
 
@@ -200,10 +201,11 @@ export class AudioDownloader {
         const buf = Buffer.from(base64, 'base64');
         await fs.mkdir(path.dirname(targetPath), { recursive: true });
         await fs.writeFile(targetPath, buf);
+        console.error(`🍪 Cookies written from environment variable to: ${targetPath}`);
         return targetPath;
       }
     } catch (err) {
-      console.error('Failed writing cookies from env:', err);
+      console.error('❌ Failed writing cookies from env:', err);
     }
 
     // Default cookie paths to check
@@ -215,39 +217,65 @@ export class AudioDownloader {
     for (const cookiePath of cookiePaths) {
       try {
         if (await fileExists(cookiePath)) {
-          const isStale = await this.isCookieFileStale(cookiePath, 60); // 1 hour
+          const age = await this.getCookieAge(cookiePath);
+          console.error(`🍪 Found cookie file: ${cookiePath} (age: ${age})`);
+          
+          const maxAgeMinutes = parseInt(process.env.YTDLP_COOKIE_MAX_AGE_MINUTES || '60'); // Default 1 hour
+          const isStale = await this.isCookieFileStale(cookiePath, maxAgeMinutes);
           
           if (isStale) {
-            console.error(`Cookie file ${cookiePath} is stale, refreshing...`);
+            console.error(`⚠️ Cookie file ${cookiePath} is stale (${age}), refreshing...`);
             if ((process.env.YTDLP_DISABLE_COOKIE_REFRESH || '').toLowerCase() === 'true') {
-              console.error('Cookie refresh disabled by env; using stale cookies.');
+              console.error('🚫 Cookie refresh disabled by env; using stale cookies.');
             } else {
               await this.refreshCookies(cookiePath);
             }
+          } else {
+            console.error(`✅ Cookie file ${cookiePath} is fresh (${age})`);
           }
           
           return cookiePath;
         }
       } catch (error) {
-        console.error(`Error checking cookie file ${cookiePath}:`, error);
+        console.error(`❌ Error checking cookie file ${cookiePath}:`, error);
         continue;
       }
     }
 
     // No existing cookies, try to create them
     const defaultPath = cookiePaths[0];
-    console.error('No cookie file found, creating fresh cookies...');
+    console.error('🍪 No cookie file found, creating fresh cookies...');
     try {
       if ((process.env.YTDLP_DISABLE_COOKIE_REFRESH || '').toLowerCase() === 'true') {
-        console.error('Cookie refresh disabled; returning null cookies.');
+        console.error('🚫 Cookie refresh disabled; returning null cookies.');
         return null;
       } else {
         await this.refreshCookies(defaultPath);
         return defaultPath;
       }
     } catch (error) {
-      console.error('Failed to create fresh cookies:', error);
+      console.error('❌ Failed to create fresh cookies:', error);
       return null;
+    }
+  }
+
+  private async getCookieAge(cookiePath: string): Promise<string> {
+    try {
+      const stats = await fs.stat(cookiePath);
+      const ageMs = Date.now() - stats.mtime.getTime();
+      const ageMinutes = Math.floor(ageMs / (1000 * 60));
+      const ageHours = Math.floor(ageMinutes / 60);
+      const ageDays = Math.floor(ageHours / 24);
+      
+      if (ageDays > 0) {
+        return `${ageDays} day(s)`;
+      } else if (ageHours > 0) {
+        return `${ageHours} hour(s)`;
+      } else {
+        return `${ageMinutes} minute(s)`;
+      }
+    } catch {
+      return 'unknown';
     }
   }
 
@@ -263,10 +291,11 @@ export class AudioDownloader {
 
   private async refreshCookies(cookiePath: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      console.error('Starting cookie refresh process...');
+      console.error('🍪 Starting cookie refresh process...');
       
-      const scriptPath = path.join(__dirname, '../../scripts/extract-youtube-cookies.js');
-      const child = spawn('node', [scriptPath], {
+      // Use ts-node to run the TypeScript script
+      const scriptPath = path.join(__dirname, '../../scripts/extract-youtube-cookies.ts');
+      const child = spawn('npx', ['ts-node', scriptPath], {
         stdio: ['pipe', 'pipe', 'pipe'],
         env: { ...process.env, COOKIE_OUTPUT_PATH: cookiePath }
       });
@@ -275,25 +304,31 @@ export class AudioDownloader {
       let stderr = '';
 
       child.stdout?.on('data', (data) => {
-        stdout += data.toString();
+        const output = data.toString();
+        stdout += output;
+        // Log cookie extraction progress to stderr for visibility
+        process.stderr.write(output);
       });
 
       child.stderr?.on('data', (data) => {
-        stderr += data.toString();
+        const output = data.toString();
+        stderr += output;
+        // Log cookie extraction errors to stderr for visibility
+        process.stderr.write(output);
       });
 
       child.on('close', (code) => {
         if (code === 0) {
-          console.error('Cookie refresh completed successfully');
+          console.error('✅ Cookie refresh completed successfully');
           resolve();
         } else {
-          console.error('Cookie refresh failed:', stderr);
+          console.error('❌ Cookie refresh failed:', stderr);
           reject(new Error(`Cookie refresh failed with code ${code}: ${stderr}`));
         }
       });
 
       child.on('error', (error) => {
-        console.error('Cookie refresh process error:', error);
+        console.error('❌ Cookie refresh process error:', error);
         reject(error);
       });
     });

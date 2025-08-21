@@ -296,6 +296,64 @@ const result = await processor.processAudio(options);
 console.log(result);
 ```
 
+## Cookie Management & Logging
+
+The system automatically manages YouTube cookies using Playwright to bypass bot detection. Here's how it works:
+
+### Automatic Cookie Refresh
+
+- **Cookie Age Check**: Cookies are refreshed when they're older than 60 minutes (configurable via `YTDLP_COOKIE_MAX_AGE_MINUTES`)
+- **Playwright Automation**: Uses headless Chrome to visit YouTube and collect fresh cookies
+- **Logging**: All cookie operations are logged with timestamps and age information
+
+### Cookie Logging
+
+When the system starts, you'll see logs like:
+```
+🍪 Checking cookie status...
+📁 Cookie file: /data/cookies.txt (age: 45 minute(s))
+✅ Cookie file /data/cookies.txt is fresh (45 minute(s))
+```
+
+Or if cookies need refreshing:
+```
+🍪 Found cookie file: /data/cookies.txt (age: 2 hour(s))
+⚠️ Cookie file /data/cookies.txt is stale (2 hour(s)), refreshing...
+🍪 Starting cookie refresh process...
+🌐 Navigating to YouTube...
+🔍 Performing search to trigger cookie collection...
+🍪 Collected 15 cookies from YouTube
+✅ Cookies written to /data/cookies.txt in Netscape format
+```
+
+### Environment Variables for Cookie Management
+
+```env
+# Cookie refresh interval (in minutes)
+YTDLP_COOKIE_MAX_AGE_MINUTES=60
+
+# Disable automatic cookie refresh (useful for Fly.io)
+YTDLP_DISABLE_COOKIE_REFRESH=false
+
+# Base64 encoded cookies (alternative to automatic refresh)
+YTDLP_COOKIES_BASE64=
+
+# Cookie file location
+COOKIE_OUTPUT_PATH=/data/cookies.txt
+```
+
+### Testing Cookie Functionality
+
+You can test cookie functionality with:
+```bash
+node test-cookies.js
+```
+
+This will show:
+- Cookie file location and age
+- Environment variable configuration
+- Whether cookies need refreshing
+
 ## Project Structure
 
 ```

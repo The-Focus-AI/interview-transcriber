@@ -42,6 +42,43 @@ export class AudioProcessor {
   async processAudio(options: ProcessingOptions): Promise<FinalOutput> {
     console.log("\n🎙️  Audio Transcription Process Started\n");
     console.log(`URL: ${options.url}`);
+    console.log(`🕐 Started at: ${new Date().toISOString()}`);
+
+    // Log cookie status at startup
+    console.log("\n🍪 Checking cookie status...");
+    try {
+      const cookiePaths = ['/data/cookies.txt', './cookies.txt'];
+      let cookieFound = false;
+      for (const cookiePath of cookiePaths) {
+        try {
+          const stats = await fs.stat(cookiePath);
+          const ageMs = Date.now() - stats.mtime.getTime();
+          const ageMinutes = Math.floor(ageMs / (1000 * 60));
+          const ageHours = Math.floor(ageMinutes / 60);
+          const ageDays = Math.floor(ageHours / 24);
+          
+          let ageStr: string;
+          if (ageDays > 0) {
+            ageStr = `${ageDays} day(s)`;
+          } else if (ageHours > 0) {
+            ageStr = `${ageHours} hour(s)`;
+          } else {
+            ageStr = `${ageMinutes} minute(s)`;
+          }
+          
+          console.log(`📁 Cookie file: ${cookiePath} (age: ${ageStr})`);
+          cookieFound = true;
+          break;
+        } catch {
+          // File doesn't exist, continue to next path
+        }
+      }
+      if (!cookieFound) {
+        console.log(`📁 No cookie file found - will create fresh cookies`);
+      }
+    } catch (error) {
+      console.log(`⚠️ Could not check cookie status: ${error}`);
+    }
 
     const tempDir = options.tempDir || process.env.TEMP_DIR || "./temp";
     const now = new Date();
