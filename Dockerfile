@@ -4,14 +4,14 @@ RUN apk add git openssh
 
 WORKDIR /app
 
-RUN git  clone  https://github.com/The-Focus-AI/shell-job-queue.git .
+RUN git  clone https://github.com/The-Focus-AI/shell-job-queue.git .
 
 RUN go mod download
 
 RUN go build -o processjobqueue main.go
 
-# Use official Node.js LTS image
-FROM node:18-slim
+# Use official Node.js 24.2.0 image
+FROM node:24.2.0-slim
 
 # Copy processjobqueue binary from previous stage
 COPY --from=processjobqueue /app/processjobqueue /usr/local/bin/
@@ -29,6 +29,8 @@ RUN npm install -g pnpm
 # Install Playwright browsers
 RUN npx playwright install chromium
 
+# Live on the edge
+RUN yt-dlp --update-to master
 
 # Set workdir
 WORKDIR /app

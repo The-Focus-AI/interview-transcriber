@@ -74,69 +74,17 @@ export class AudioDownloader {
   private async downloadYouTubeAudio(url: string, options: DownloadOptions): Promise<string> {
     console.error(`Downloading audio from YouTube: ${url}`);
 
-    const format = options.format || 'mp3';
     const ytDlpOptions = [
       url,
       '-x', // Extract audio
-      '--audio-format', format,
-      '--audio-quality', '0', // Best quality
+      '--audio-format', 'mp3',
       '-o', options.outputPath,
-      '--no-playlist', // Download only the video, not the playlist
-      '--no-check-certificate',
-      '--prefer-ffmpeg',
-      '--add-metadata',
-      '--embed-thumbnail',
-      '--referer', 'https://www.youtube.com/',
-      '--sleep-interval', '1',
-      '--max-sleep-interval', '5',
-      '--sleep-subtitles', '1',
     ];
 
-    // Networking and anti-bot tuning via environment
-    const forceIpv4 = (process.env.YTDLP_FORCE_IPV4 || '').toLowerCase() === 'true';
-    if (forceIpv4) {
-      ytDlpOptions.push('--force-ipv4');
-    }
-
+    // Only add proxy if configured
     const proxy = process.env.YTDLP_PROXY;
     if (proxy) {
       ytDlpOptions.push('--proxy', proxy);
-    }
-
-    // Pause between requests can help reduce bot detection
-    const sleepRequests = process.env.YTDLP_SLEEP_REQUESTS;
-    const maxSleepRequests = process.env.YTDLP_MAX_SLEEP_REQUESTS;
-    if (sleepRequests) ytDlpOptions.push('--sleep-requests', sleepRequests);
-    if (maxSleepRequests) ytDlpOptions.push('--max-sleep-interval', maxSleepRequests);
-
-    // Retries
-    ytDlpOptions.push('--retries', process.env.YTDLP_RETRIES || '5');
-    ytDlpOptions.push('--fragment-retries', process.env.YTDLP_FRAGMENT_RETRIES || '5');
-
-    // Geo-bypass controls
-    ytDlpOptions.push('--geo-bypass');
-    if (process.env.YTDLP_GEO_BYPASS_COUNTRY) {
-      ytDlpOptions.push('--geo-bypass-country', process.env.YTDLP_GEO_BYPASS_COUNTRY);
-    }
-
-    // Use web client by default (more reliable than android)
-    const playerClient = process.env.YTDLP_PLAYER_CLIENT || 'web';
-    
-    // Only add extractor args if explicitly configured
-    if (process.env.YTDLP_EXTRACTOR_ARGS) {
-      ytDlpOptions.push('--extractor-args', process.env.YTDLP_EXTRACTOR_ARGS);
-    }
-
-    // User-Agent selection (use web UA by default)
-    const defaultWebUA =
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-    const userAgent = process.env.YTDLP_USER_AGENT || defaultWebUA;
-    ytDlpOptions.push('--user-agent', userAgent);
-
-    // Get cookie path and refresh if needed
-    const cookiePath = await this.ensureFreshCookies(options.cookiesPath);
-    if (cookiePath) {
-      ytDlpOptions.push('--cookies', cookiePath);
     }
 
     console.error(`yt-dlp options: ${ytDlpOptions.join(' ')}`);
@@ -161,7 +109,7 @@ export class AudioDownloader {
             resolve(options.outputPath);
           } else {
             // yt-dlp might have added extension automatically
-            const pathWithExt = `${options.outputPath}.${format}`;
+            const pathWithExt = `${options.outputPath}.mp3`;
             if (await fileExists(pathWithExt)) {
               console.error(`Downloaded audio to: ${pathWithExt}`);
               resolve(pathWithExt);

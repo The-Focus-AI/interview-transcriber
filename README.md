@@ -263,16 +263,15 @@ Running yt-dlp from Fly.io (or most cloud/DC IP ranges) can trigger YouTube anti
 
 ### Recommended Setup on Fly.io
 
-**Option 1: Proxy-Only Approach (Recommended)**
-The residential proxy alone has been tested and successfully bypasses YouTube's bot detection without requiring cookies:
+**Option 1: Ultra-Simple Proxy-Only Approach (Recommended)**
+The residential proxy alone has been tested and successfully bypasses YouTube's bot detection. This is the minimal configuration that works:
 
 ```bash
 # Set up residential proxy (tested and working)
 fly secrets set YTDLP_PROXY=http://9YEi8p9D0pR2o3q2:6lco8HgcyzFXsIg1@geo.iproyal.com:12321
-
-# Additional anti-bot measures (simplified for reliability)
-fly secrets set YTDLP_FORCE_IPV4=true YTDLP_RETRIES=3 YTDLP_FRAGMENT_RETRIES=3
 ```
+
+**That's it!** No other configuration needed. yt-dlp handles format selection and quality automatically.
 
 **Option 2: Cookie-Based Approach**
 If you prefer to use cookies or need them for private/age-restricted content:
