@@ -89,7 +89,7 @@ export class AudioChunker {
         .on('progress', (progress: any) => {
           // Optionally log progress
           if (progress.percent) {
-            process.stdout.write(`\rChunk ${chunk.index}: ${Math.round(progress.percent)}%`);
+            process.stderr.write(`\rChunk ${chunk.index}: ${Math.round(progress.percent)}%`);
           }
         })
         .run();
