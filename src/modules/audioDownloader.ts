@@ -119,18 +119,18 @@ export class AudioDownloader {
       ytDlpOptions.push('--geo-bypass-country', process.env.YTDLP_GEO_BYPASS_COUNTRY);
     }
 
-    // Choose a player client; android is often less strict
-    const playerClient = process.env.YTDLP_PLAYER_CLIENT || 'android';
-    const extractorArgs =
-      process.env.YTDLP_EXTRACTOR_ARGS || `youtube:player_client=${playerClient},player_skip=webpage`;
-    ytDlpOptions.push('--extractor-args', extractorArgs);
+    // Use web client by default (more reliable than android)
+    const playerClient = process.env.YTDLP_PLAYER_CLIENT || 'web';
+    
+    // Only add extractor args if explicitly configured
+    if (process.env.YTDLP_EXTRACTOR_ARGS) {
+      ytDlpOptions.push('--extractor-args', process.env.YTDLP_EXTRACTOR_ARGS);
+    }
 
-    // User-Agent selection (align with player client if not overridden)
-    const defaultAndroidUA =
-      'com.google.android.youtube/18.31.40 (Linux; U; Android 13) gzip';
+    // User-Agent selection (use web UA by default)
     const defaultWebUA =
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-    const userAgent = process.env.YTDLP_USER_AGENT || (playerClient === 'android' ? defaultAndroidUA : defaultWebUA);
+    const userAgent = process.env.YTDLP_USER_AGENT || defaultWebUA;
     ytDlpOptions.push('--user-agent', userAgent);
 
     // Get cookie path and refresh if needed

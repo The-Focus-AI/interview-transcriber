@@ -28,3 +28,7 @@ depends = ['pnpm-install']
 [tasks.extract-youtube-cookies]
 description = 'Extract YouTube cookies in Netscape format using Playwright'
 run = 'npx tsx scripts/extract-youtube-cookies.ts'
+
+[tasks.test-proxy]
+description = 'Test the proxy'
+run = 'curl -v -x http://9YEi8p9D0pR2o3q2:6lco8HgcyzFXsIg1@geo.iproyal.com:12321 -L https://ipv4.icanhazip.com'
