@@ -214,6 +214,10 @@ export class SpotifyDownloader {
       // Import required packages
       const ytSearch = require('yt-search');
       const stringSimilarity = require('string-similarity');
+      
+      // Explicitly disable debug mode to prevent dasu.response file creation
+      const dasu = require('dasu');
+      dasu.debug = false;
 
       let searchTerms: string[] = [];
 

@@ -61,3 +61,7 @@ yarn.lock
 .pnpm-store/
 
 jobs/
+
+# Debug files
+dasu.response
+debug.dasu-response.log
