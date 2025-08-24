@@ -18,6 +18,9 @@ export interface FinalOutput {
   topics?: string[];
   thumbnail?: string;
   date?: string;
+  spotify_info?: any;
+  youtube_url?: string;
+  youtube_metadata?: any;
 }
 
 export interface ChunkTranscription {

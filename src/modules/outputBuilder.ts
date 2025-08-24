@@ -28,7 +28,10 @@ export class OutputBuilder {
       people,
       topics,
       thumbnail,
-      date
+      date,
+      spotifyInfo,
+      youtubeUrl,
+      youtubeMetadata
     }: {
       description?: string;
       duration?: number;
@@ -36,6 +39,9 @@ export class OutputBuilder {
       topics?: string[];
       thumbnail?: string;
       date?: string;
+      spotifyInfo?: any;
+      youtubeUrl?: string;
+      youtubeMetadata?: any;
     } = {}
   ): Promise<FinalOutput> {
     console.log('Building final output...');
@@ -67,7 +73,10 @@ export class OutputBuilder {
       people: allPeople,
       topics: limitedTopics,
       thumbnail,
-      date
+      date,
+      ...(spotifyInfo && { spotify_info: spotifyInfo }),
+      ...(youtubeUrl && { youtube_url: youtubeUrl }),
+      ...(youtubeMetadata && { youtube_metadata: youtubeMetadata })
     };
 
     return output;

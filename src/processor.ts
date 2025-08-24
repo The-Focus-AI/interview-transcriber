@@ -118,6 +118,10 @@ export class AudioProcessor {
       let date: string | undefined = undefined;
       let people: string[] = [];
       let topics: string[] = [];
+      let spotifyInfo: any = null;
+      let youtubeUrl: string | undefined = undefined;
+      let youtubeMetadata: any = undefined;
+      
       try {
         const metadata = await this.downloader.getVideoInfo(options.url);
         title = metadata.title || metadata.fulltitle || 'Unknown Title';
@@ -136,12 +140,41 @@ export class AudioProcessor {
       let downsampledPath: string;
       try {
         const audioPath = path.join(runTempDir, "audio.mp3");
-        downloadedPath = await this.downloader.downloadAudio(options.url, {
-          outputPath: audioPath,
-          format: "mp3",
-          showProgress: false,
-          cookiesPath: "cookies.txt", // Pass cookies.txt for yt-dlp authentication
-        });
+        
+        // Check if it's a Spotify URL to capture additional metadata
+        if (options.url.includes('open.spotify.com')) {
+          const { SpotifyDownloader } = await import('./modules/spotifyDownloader');
+          const spotifyDownloader = new SpotifyDownloader();
+          const result = await spotifyDownloader.downloadAudio(options.url, {
+            outputPath: audioPath,
+            showProgress: false
+          });
+          
+          downloadedPath = result.filePath;
+          spotifyInfo = result.spotifyInfo;
+          youtubeUrl = result.youtubeUrl;
+          
+          // Use YouTube metadata for title and description if available
+          if (result.youtubeMetadata) {
+            title = result.youtubeMetadata.title || result.youtubeMetadata.fulltitle || title;
+            description = result.youtubeMetadata.description || description;
+            duration = result.youtubeMetadata.duration || duration;
+            thumbnail = result.youtubeMetadata.thumbnail || thumbnail;
+            date = result.youtubeMetadata.upload_date || result.youtubeMetadata.release_date || date;
+            console.log(`YouTube Title: ${title}`);
+          }
+          
+          // Store the YouTube metadata for later use
+          const youtubeMetadata = result.youtubeMetadata;
+        } else {
+          downloadedPath = await this.downloader.downloadAudio(options.url, {
+            outputPath: audioPath,
+            format: "mp3",
+            showProgress: false,
+            cookiesPath: "cookies.txt", // Pass cookies.txt for yt-dlp authentication
+          });
+        }
+        
         stepStatus.download = true;
       } catch (error) {
         console.error(`❌ Download failed: ${(error as Error).message}`);
@@ -334,7 +367,10 @@ export class AudioProcessor {
           people,
           topics,
           thumbnail,
-          date
+          date,
+          spotifyInfo,
+          youtubeUrl,
+          youtubeMetadata: youtubeMetadata || (youtubeUrl ? await this.downloader.getVideoInfo(youtubeUrl).catch(() => null) : undefined)
         }
       );
 

@@ -26,10 +26,13 @@ export class AudioDownloader {
       if (this.isDirectMP3Url(url)) {
         return await this.downloadDirectMP3(url, options.outputPath, options.showProgress);
       } else if (this.isSpotifyUrl(url)) {
-        return await this.spotifyDownloader.downloadAudio(url, {
+        const result = await this.spotifyDownloader.downloadAudio(url, {
           outputPath: options.outputPath,
           showProgress: options.showProgress
         });
+        
+        // Return the file path for backward compatibility
+        return result.filePath;
       } else {
         return await this.downloadYouTubeAudio(url, options);
       }
@@ -124,7 +127,7 @@ export class AudioDownloader {
   async getVideoInfo(url: string): Promise<any> {
     try {
       if (this.isSpotifyUrl(url)) {
-        return await this.spotifyDownloader.getTrackInfo(url);
+        return await this.spotifyDownloader.getItemInfo(url);
       } else {
         // Use child_process to call yt-dlp directly for metadata extraction
         const { spawn } = require('child_process');
