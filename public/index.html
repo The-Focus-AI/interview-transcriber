@@ -19,7 +19,7 @@
             background: #000;
         }
 
-        /* 80s Neon Animated Gradient Background */
+        /* 80s Neon Animated Gradient Background - toned down */
         .gradient-bg {
             position: fixed;
             top: 0;
@@ -29,7 +29,8 @@
             z-index: -1;
             background: linear-gradient(0deg, #ff00ff, #00ffff, #ff0080, #8000ff, #00ff80, #ff8000);
             background-size: 400% 400%;
-            animation: gradientShift 8s ease infinite, gradientRotate 12s linear infinite;
+            animation: gradientShift 12s ease infinite, gradientRotate 20s linear infinite;
+            opacity: 0.7;
         }
 
         @keyframes gradientShift {
@@ -68,7 +69,7 @@
             }
         }
 
-        /* Floating particles */
+        /* Floating particles - reduced count and intensity */
         .particles {
             position: fixed;
             top: 0;
@@ -81,12 +82,13 @@
 
         .particle {
             position: absolute;
-            width: 6px;
-            height: 6px;
+            width: 4px;
+            height: 4px;
             background: radial-gradient(circle, #00ffff 0%, #ff00ff 50%, transparent 100%);
             border-radius: 50%;
-            animation: float 6s ease-in-out infinite;
-            box-shadow: 0 0 10px #00ffff, 0 0 20px #ff00ff;
+            animation: float 8s ease-in-out infinite;
+            box-shadow: 0 0 5px #00ffff, 0 0 10px #ff00ff;
+            opacity: 0.6;
         }
 
         @keyframes float {
@@ -95,8 +97,8 @@
                 opacity: 0;
             }
             50% {
-                transform: translateY(-100px) rotate(180deg);
-                opacity: 1;
+                transform: translateY(-60px) rotate(180deg);
+                opacity: 0.6;
             }
         }
 
@@ -130,40 +132,28 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: 1rem;
-            animation: neonGlow 3s ease-in-out infinite alternate, textGradient 4s ease infinite;
+            animation: neonGlow 4s ease-in-out infinite alternate, textGradient 6s ease infinite;
             text-shadow: 
-                0 0 5px #ff00ff,
-                0 0 10px #ff00ff,
-                0 0 15px #ff00ff,
-                0 0 20px #ff00ff,
-                0 0 35px #ff00ff,
-                0 0 40px #ff00ff,
-                0 0 50px #ff00ff,
-                0 0 75px #ff00ff;
+                0 0 3px #ff00ff,
+                0 0 6px #ff00ff,
+                0 0 9px #ff00ff,
+                0 0 12px #ff00ff;
         }
 
         @keyframes neonGlow {
             from {
                 text-shadow: 
-                    0 0 5px #ff00ff,
-                    0 0 10px #ff00ff,
-                    0 0 15px #ff00ff,
-                    0 0 20px #ff00ff,
-                    0 0 35px #ff00ff,
-                    0 0 40px #ff00ff,
-                    0 0 50px #ff00ff,
-                    0 0 75px #ff00ff;
+                    0 0 3px #ff00ff,
+                    0 0 6px #ff00ff,
+                    0 0 9px #ff00ff,
+                    0 0 12px #ff00ff;
             }
             to {
                 text-shadow: 
                     0 0 2px #00ffff,
                     0 0 4px #00ffff,
                     0 0 6px #00ffff,
-                    0 0 8px #00ffff,
-                    0 0 10px #00ffff,
-                    0 0 20px #00ffff,
-                    0 0 30px #00ffff,
-                    0 0 40px #00ffff;
+                    0 0 8px #00ffff;
             }
         }
 
@@ -189,24 +179,21 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             text-shadow: 
-                0 0 5px #00ffff,
-                0 0 10px #00ffff,
-                0 0 15px #00ffff;
-            animation: taglinePulse 2s ease-in-out infinite alternate;
+                0 0 3px #00ffff,
+                0 0 6px #00ffff;
+            animation: taglinePulse 3s ease-in-out infinite alternate;
         }
 
         @keyframes taglinePulse {
             from {
                 text-shadow: 
-                    0 0 5px #00ffff,
-                    0 0 10px #00ffff,
-                    0 0 15px #00ffff;
+                    0 0 3px #00ffff,
+                    0 0 6px #00ffff;
             }
             to {
                 text-shadow: 
-                    0 0 10px #00ffff,
-                    0 0 20px #00ffff,
-                    0 0 30px #00ffff;
+                    0 0 6px #00ffff,
+                    0 0 12px #00ffff;
             }
         }
 
@@ -218,11 +205,10 @@
             max-width: 600px;
             font-family: 'Courier New', monospace;
             text-shadow: 
-                0 0 5px #ff00ff,
-                0 0 10px #ff00ff;
+                0 0 3px #ff00ff;
         }
 
-        /* 80s Neon CTA Button */
+        /* 80s Neon CTA Button - toned down */
         .cta-button {
             display: inline-flex;
             align-items: center;
@@ -236,35 +222,32 @@
             color: #000;
             background: linear-gradient(45deg, #ff00ff, #00ffff, #ff0080);
             background-size: 200% 200%;
-            border: 3px solid #00ffff;
+            border: 2px solid #00ffff;
             border-radius: 0;
             cursor: pointer;
             text-decoration: none;
             transition: all 0.3s ease;
             box-shadow: 
+                0 0 5px #00ffff,
                 0 0 10px #00ffff,
-                0 0 20px #00ffff,
-                0 0 30px #00ffff,
-                inset 0 0 20px rgba(0, 255, 255, 0.3);
+                inset 0 0 10px rgba(0, 255, 255, 0.2);
             position: relative;
             overflow: hidden;
-            animation: buttonGlow 2s ease-in-out infinite alternate, buttonGradient 3s ease infinite;
+            animation: buttonGlow 3s ease-in-out infinite alternate, buttonGradient 4s ease infinite;
         }
 
         @keyframes buttonGlow {
             from {
                 box-shadow: 
+                    0 0 5px #00ffff,
                     0 0 10px #00ffff,
-                    0 0 20px #00ffff,
-                    0 0 30px #00ffff,
-                    inset 0 0 20px rgba(0, 255, 255, 0.3);
+                    inset 0 0 10px rgba(0, 255, 255, 0.2);
             }
             to {
                 box-shadow: 
+                    0 0 10px #ff00ff,
                     0 0 20px #ff00ff,
-                    0 0 40px #ff00ff,
-                    0 0 60px #ff00ff,
-                    inset 0 0 20px rgba(255, 0, 255, 0.3);
+                    inset 0 0 10px rgba(255, 0, 255, 0.2);
             }
         }
 
@@ -287,7 +270,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
             transition: left 0.5s;
         }
 
@@ -296,29 +279,28 @@
         }
 
         .cta-button:hover {
-            transform: translateY(-5px) scale(1.05);
+            transform: translateY(-3px) scale(1.03);
             box-shadow: 
+                0 0 15px #ff00ff,
                 0 0 30px #ff00ff,
-                0 0 60px #ff00ff,
-                0 0 90px #ff00ff,
-                inset 0 0 30px rgba(255, 0, 255, 0.5);
+                inset 0 0 15px rgba(255, 0, 255, 0.3);
         }
 
         .cta-button:active {
-            transform: translateY(-2px) scale(1.02);
+            transform: translateY(-1px) scale(1.01);
         }
 
         .arrow-icon {
             transition: transform 0.3s ease;
-            filter: drop-shadow(0 0 5px #00ffff);
+            filter: drop-shadow(0 0 3px #00ffff);
         }
 
         .cta-button:hover .arrow-icon {
-            transform: translateX(8px) scale(1.2);
-            filter: drop-shadow(0 0 10px #ff00ff);
+            transform: translateX(5px) scale(1.1);
+            filter: drop-shadow(0 0 6px #ff00ff);
         }
 
-        /* 80s Neon Features section */
+        /* 80s Neon Features section - toned down */
         .features {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -329,12 +311,12 @@
         }
 
         .feature {
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
             border-radius: 0;
             padding: 2rem;
             text-align: center;
-            border: 2px solid #00ffff;
+            border: 1px solid #00ffff;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
@@ -347,7 +329,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
             transition: left 0.5s;
         }
 
@@ -356,19 +338,18 @@
         }
 
         .feature:hover {
-            transform: translateY(-10px) scale(1.05);
+            transform: translateY(-5px) scale(1.02);
             box-shadow: 
-                0 0 20px #00ffff,
-                0 0 40px #00ffff,
-                0 0 60px #00ffff;
+                0 0 10px #00ffff,
+                0 0 20px #00ffff;
             border-color: #ff00ff;
         }
 
         .feature-icon {
             font-size: 3rem;
             margin-bottom: 1rem;
-            filter: drop-shadow(0 0 10px #ff00ff);
-            animation: iconFloat 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 5px #ff00ff);
+            animation: iconFloat 4s ease-in-out infinite;
         }
 
         @keyframes iconFloat {
@@ -376,7 +357,7 @@
                 transform: translateY(0px);
             }
             50% {
-                transform: translateY(-10px);
+                transform: translateY(-5px);
             }
         }
 
@@ -389,15 +370,15 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             text-shadow: 
-                0 0 5px #00ffff,
-                0 0 10px #00ffff;
+                0 0 3px #00ffff,
+                0 0 6px #00ffff;
         }
 
         .feature-description {
             color: #ff00ff;
             line-height: 1.6;
             font-family: 'Courier New', monospace;
-            text-shadow: 0 0 5px #ff00ff;
+            text-shadow: 0 0 3px #ff00ff;
         }
 
         /* Responsive design */
@@ -476,10 +457,10 @@
     </div>
 
     <script>
-        // Create floating neon particles
+        // Create floating neon particles - reduced count
         function createParticles() {
             const particlesContainer = document.getElementById('particles');
-            const particleCount = 80;
+            const particleCount = 40; // Reduced from 80
             
             for (let i = 0; i < particleCount; i++) {
                 const particle = document.createElement('div');
@@ -488,14 +469,14 @@
                 // Random positioning and animation delay
                 particle.style.left = Math.random() * 100 + '%';
                 particle.style.top = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 6 + 's';
-                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
                 
-                // Random neon colors
+                // Random neon colors - softer
                 const colors = ['#ff00ff', '#00ffff', '#ff0080', '#8000ff', '#00ff80'];
                 const randomColor = colors[Math.floor(Math.random() * colors.length)];
-                particle.style.background = `radial-gradient(circle, ${randomColor} 0%, ${randomColor}50 50%, transparent 100%)`;
-                particle.style.boxShadow = `0 0 10px ${randomColor}, 0 0 20px ${randomColor}`;
+                particle.style.background = `radial-gradient(circle, ${randomColor} 0%, ${randomColor}30 50%, transparent 100%)`;
+                particle.style.boxShadow = `0 0 5px ${randomColor}, 0 0 10px ${randomColor}`;
                 
                 particlesContainer.appendChild(particle);
             }
@@ -504,14 +485,14 @@
         // Initialize particles when page loads
         document.addEventListener('DOMContentLoaded', createParticles);
         
-        // Add some interactive effects
+        // Add some interactive effects - toned down
         document.addEventListener('mousemove', (e) => {
             const particles = document.querySelectorAll('.particle');
             const mouseX = e.clientX / window.innerWidth;
             const mouseY = e.clientY / window.innerHeight;
             
             particles.forEach((particle, index) => {
-                const speed = (index % 3 + 1) * 0.5;
+                const speed = (index % 3 + 1) * 0.2; // Reduced from 0.5
                 const x = (mouseX - 0.5) * speed;
                 const y = (mouseY - 0.5) * speed;
                 
