@@ -126,8 +126,52 @@ export class AudioDownloader {
       if (this.isSpotifyUrl(url)) {
         return await this.spotifyDownloader.getTrackInfo(url);
       } else {
-        const metadata = await this.ytDlpWrap.getVideoInfo(url);
-        return metadata;
+        // Use child_process to call yt-dlp directly for metadata extraction
+        const { spawn } = require('child_process');
+        
+        const ytDlpArgs = [
+          url,
+          '--skip-download',
+          '--dump-json'
+        ];
+
+        // Only add proxy if configured
+        const proxy = process.env.YTDLP_PROXY;
+        if (proxy) {
+          ytDlpArgs.push('--proxy', proxy);
+        }
+
+        return new Promise((resolve, reject) => {
+          let output = '';
+          let errorOutput = '';
+          
+          const ytDlpProcess = spawn('yt-dlp', ytDlpArgs);
+          
+          ytDlpProcess.stdout.on('data', (data: Buffer) => {
+            output += data.toString();
+          });
+          
+          ytDlpProcess.stderr.on('data', (data: Buffer) => {
+            errorOutput += data.toString();
+          });
+          
+          ytDlpProcess.on('close', (code: number) => {
+            if (code === 0 && output.trim()) {
+              try {
+                const metadata = JSON.parse(output.trim());
+                resolve(metadata);
+              } catch (parseError) {
+                reject(new Error(`Failed to parse metadata JSON: ${parseError}`));
+              }
+            } else {
+              reject(new Error(`yt-dlp failed with code ${code}: ${errorOutput}`));
+            }
+          });
+          
+          ytDlpProcess.on('error', (error: Error) => {
+            reject(new Error(`Failed to start yt-dlp: ${error.message}`));
+          });
+        });
       }
     } catch (error) {
       throw new Error(`Failed to get video info: ${(error as Error).message}`);
