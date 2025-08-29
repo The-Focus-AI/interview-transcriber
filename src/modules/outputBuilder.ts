@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { FinalOutput, TranscriptSegment } from '../types';
+import { FinalOutput, TranscriptSegment, YouTubeMetadata } from '../types';
 import { ensureDir } from '../utils/fileUtils';
 
 function extractNamesFromText(text: string): string[] {
@@ -39,9 +39,9 @@ export class OutputBuilder {
       topics?: string[];
       thumbnail?: string;
       date?: string;
-      spotifyInfo?: any;
-      youtubeUrl?: string;
-      youtubeMetadata?: any;
+        spotifyInfo?: any;
+  youtubeUrl?: string;
+  youtubeMetadata?: YouTubeMetadata;
     } = {}
   ): Promise<FinalOutput> {
     console.log('Building final output...');

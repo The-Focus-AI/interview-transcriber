@@ -11,6 +11,7 @@ import {
   FinalOutput,
   AudioChunk,
   TranscriptSegment,
+  YouTubeMetadata,
 } from "./types";
 import { ensureDir, cleanDir, generateOutputFilename } from "./utils/fileUtils";
 import * as fs from "fs/promises";
@@ -120,7 +121,7 @@ export class AudioProcessor {
       let topics: string[] = [];
       let spotifyInfo: any = null;
       let youtubeUrl: string | undefined = undefined;
-      let youtubeMetadata: any = undefined;
+      let youtubeMetadata: YouTubeMetadata | undefined = undefined;
       
       try {
         const metadata = await this.downloader.getVideoInfo(options.url);
@@ -165,7 +166,7 @@ export class AudioProcessor {
           }
           
           // Store the YouTube metadata for later use
-          const youtubeMetadata = result.youtubeMetadata;
+          youtubeMetadata = result.youtubeMetadata;
         } else {
           downloadedPath = await this.downloader.downloadAudio(options.url, {
             outputPath: audioPath,
@@ -173,6 +174,27 @@ export class AudioProcessor {
             showProgress: false,
             cookiesPath: "cookies.txt", // Pass cookies.txt for yt-dlp authentication
           });
+          
+          // For direct YouTube URLs, capture the metadata
+          if (options.url.includes('youtube.com') || options.url.includes('youtu.be')) {
+            try {
+              const rawMetadata = await this.downloader.getVideoInfo(options.url);
+              youtubeMetadata = {
+                title: rawMetadata.title || 'Unknown Title',
+                description: rawMetadata.description || '',
+                duration: rawMetadata.duration || 0,
+                view_count: rawMetadata.view_count || 0,
+                like_count: rawMetadata.like_count || 0,
+                channel: rawMetadata.channel || 'Unknown Channel',
+                upload_date: rawMetadata.upload_date || '',
+                thumbnail: rawMetadata.thumbnail || '',
+                tags: rawMetadata.tags || []
+              };
+              youtubeUrl = options.url;
+            } catch (error) {
+              console.warn('⚠️ Could not fetch YouTube metadata:', error);
+            }
+          }
         }
         
         stepStatus.download = true;

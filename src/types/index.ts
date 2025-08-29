@@ -6,6 +6,18 @@ export interface TranscriptSegment {
   tone: string;
 }
 
+export interface YouTubeMetadata {
+  title: string;
+  description: string;
+  duration: number;
+  view_count: number;
+  like_count: number;
+  channel: string;
+  upload_date: string;
+  thumbnail: string;
+  tags?: string[];
+}
+
 export interface FinalOutput {
   title: string;
   source_url: string;
@@ -20,7 +32,7 @@ export interface FinalOutput {
   date?: string;
   spotify_info?: any;
   youtube_url?: string;
-  youtube_metadata?: any;
+  youtube_metadata?: YouTubeMetadata;
 }
 
 export interface ChunkTranscription {

@@ -2,6 +2,8 @@ import { spawn } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import SpotifyWebApi from 'spotify-web-api-node';
+import { DownloadOptions, YouTubeMetadata } from '../types';
+import { AudioDownloader } from './audioDownloader';
 
 export interface SpotifyDownloadOptions {
   outputPath: string;
@@ -265,16 +267,25 @@ export class SpotifyDownloader {
     }
   }
 
-  private async getYouTubeMetadata(youtubeUrl: string): Promise<any> {
+  private async getYouTubeMetadata(youtubeUrl: string): Promise<YouTubeMetadata> {
     try {
-      // Use the existing audio downloader to get YouTube metadata
-      const { AudioDownloader } = await import('./audioDownloader');
       const audioDownloader = new AudioDownloader();
+      const rawMetadata = await audioDownloader.getVideoInfo(youtubeUrl);
       
-      return await audioDownloader.getVideoInfo(youtubeUrl);
+      // Extract only the essential fields we need
+      return {
+        title: rawMetadata.title || 'Unknown Title',
+        description: rawMetadata.description || '',
+        duration: rawMetadata.duration || 0,
+        view_count: rawMetadata.view_count || 0,
+        like_count: rawMetadata.like_count || 0,
+        channel: rawMetadata.channel || 'Unknown Channel',
+        upload_date: rawMetadata.upload_date || '',
+        thumbnail: rawMetadata.thumbnail || '',
+        tags: rawMetadata.tags || []
+      };
     } catch (error) {
-      console.error(`Failed to get YouTube metadata: ${error}`);
-      return null;
+      throw new Error(`Failed to get YouTube metadata: ${(error as Error).message}`);
     }
   }
 }
